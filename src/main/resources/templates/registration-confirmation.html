@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <style type="text/css">
+        .button{
+            background-color: #019267;
+            color: white;
+            text-align: center;
+            padding: 15px 35px;
+        }
+
+    </style>
+</head>
+<body>
+<p>
+    Hi, <span th:text="${full_name}" style="font-weight:bold"></span>!
+</p>
+<p>You already registered your email. Please click button bellow to activate your account</p>
+<a href="#" th:href="${button_link}">
+    <button class="button">Activate Account</button>
+</a>
+<p>
+    If you feel you don't registered your email in kerjamudah. just ignore it
+</p>
+</body>
+</html>
