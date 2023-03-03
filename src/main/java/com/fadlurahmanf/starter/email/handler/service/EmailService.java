@@ -27,6 +27,7 @@ public class EmailService {
     public void sendBroadcastEmail(String email) throws MessagingException {
         Map<String, Object> map = new HashMap<>();
         map.put("full_name", "fullName");
+        map.put("name", "Taufik");
         map.put("button_link", "buttonLink");
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         mimeMessage.setSubject("TES");
