@@ -1,5 +1,7 @@
 package com.fadlurahmanf.starter.email.handler.service;
 
+import com.fadlurahmanf.starter.email.dto.entity.EmailVerificationEntity;
+import com.fadlurahmanf.starter.email.handler.repository.EmailVerificationRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +15,14 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class EmailService {
     Logger logger = LoggerFactory.getLogger(EmailService.class);
+
+    @Autowired
+    public EmailVerificationRepository emailVerificationRepository;
 
     @Autowired
     JavaMailSender javaMailSender;
@@ -42,5 +48,13 @@ public class EmailService {
         logger.info("sent email success");
         logger.info("to: " + email);
         logger.info("buttonlink: " + "buttonLink");
+    }
+
+    public void updateIsVerifiedEmail(String token){
+        emailVerificationRepository.updateIsVerifiedEmailVerification(token);
+    }
+
+    public Optional<EmailVerificationEntity> findByToken(String token){
+        return emailVerificationRepository.findByToken(token);
     }
 }
