@@ -29,6 +29,7 @@ public class EmailService {
         map.put("full_name", "fullName");
         map.put("button_link", "buttonLink");
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        mimeMessage.setSubject("TES");
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
         Context context = new Context();
         context.setVariables(map);
