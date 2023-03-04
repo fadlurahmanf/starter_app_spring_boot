@@ -2,6 +2,7 @@ package com.fadlurahmanf.starter.identity.dto.entity;
 
 import com.fadlurahmanf.starter.general.constant.EntityConstant;
 import jakarta.persistence.*;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.io.Serializable;
 
@@ -9,8 +10,9 @@ import java.io.Serializable;
 @Table(name = EntityConstant.identity)
 public class IdentityEntity implements Serializable {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public Integer id;
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    public String id;
 
     public String email;
 
@@ -20,7 +22,12 @@ public class IdentityEntity implements Serializable {
 
     public IdentityEntity(){}
 
-    public IdentityEntity(Integer id, String email, String password, String createdAt){
+    public IdentityEntity(String email, String password){
+        this.email = email;
+        this.password = password;
+    }
+
+    public IdentityEntity(String id, String email, String password, String createdAt){
         this.id = id;
         this.email = email;
         this.password = password;

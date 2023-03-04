@@ -26,7 +26,7 @@ public class EmailController {
     public ResponseEntity broadcastEmail(@RequestBody String body){
         try {
             JSONObject jsonObject = new JSONObject(body);
-            String email = RequestBodyValidator.isEmailExist(jsonObject);
+            String email = RequestBodyValidator.validateEmailRequest(jsonObject);
             emailService.sendBroadcastEmail(email);
             return new ResponseEntity(new BaseResponse<>(HttpStatus.OK.value(), MessageConstant.SUCCESS), HttpStatus.OK);
         }catch (MessagingException e){
@@ -49,7 +49,7 @@ public class EmailController {
     public ResponseEntity requestEmail(@RequestBody String body){
         try {
             JSONObject jsonObject = new JSONObject(body);
-            String email = RequestBodyValidator.isEmailExist(jsonObject);
+            String email = RequestBodyValidator.validateEmailRequest(jsonObject);
             emailService.sendBroadcastEmail(email);
             emailService.insertNewRegistrationEmail(email);
             return new ResponseEntity<>(new BaseResponse<>(HttpStatus.OK.value(), MessageConstant.SUCCESS), HttpStatus.OK);
