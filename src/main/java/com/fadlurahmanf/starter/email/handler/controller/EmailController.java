@@ -5,6 +5,7 @@ import com.fadlurahmanf.starter.email.handler.service.EmailService;
 import com.fadlurahmanf.starter.email.helper.EmailHelper;
 import com.fadlurahmanf.starter.general.constant.MessageConstant;
 import com.fadlurahmanf.starter.general.constant.PathConstant;
+import com.fadlurahmanf.starter.general.dto.exception.CustomException;
 import com.fadlurahmanf.starter.general.dto.response.BaseResponse;
 import com.fadlurahmanf.starter.general.helper.validator.RequestBodyValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,15 +58,17 @@ public class EmailController {
                 Boolean isExpired = EmailHelper.isExpired(email.expiredAt);
                 Boolean isVerified = email.isVerified;
                 if(isVerified){
-                    throw new Exception(MessageConstant.EMAIL_NOT_VALID);
+                    throw new CustomException(MessageConstant.EMAIL_NOT_VALID);
                 }else if (isExpired){
-                    throw new Exception(MessageConstant.EMAIL_EXPIRED);
+                    throw new CustomException(MessageConstant.EMAIL_EXPIRED);
                 }
                 emailService.updateIsVerifiedEmail(email.token);
                 return new ResponseEntity<>(new BaseResponse<>(HttpStatus.OK.value(), MessageConstant.SUCCESS), HttpStatus.OK);
             }else{
-                throw new Exception(MessageConstant.EMAIL_NOT_FOUND);
+                throw new CustomException(MessageConstant.EMAIL_NOT_FOUND);
             }
+        }catch (CustomException e){
+            return new ResponseEntity<>(new BaseResponse<>(e.statusCode, e.message), e.httpStatus);
         }catch (Exception e){
             return new ResponseEntity<>(new BaseResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }

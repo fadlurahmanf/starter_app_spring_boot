@@ -3,6 +3,7 @@ package com.fadlurahmanf.starter.email.helper;
 import com.fadlurahmanf.starter.email.constant.EmailConstant;
 import com.fadlurahmanf.starter.email.constant.EmailType;
 import com.fadlurahmanf.starter.general.constant.MessageConstant;
+import com.fadlurahmanf.starter.general.dto.exception.CustomException;
 import com.fadlurahmanf.starter.general.helper.Utility;
 
 import java.text.ParseException;
@@ -26,7 +27,7 @@ public class EmailHelper {
         LocalDateTime expired = Utility.stringToLocalDateTime(time);
         LocalDateTime now = LocalDateTime.now();
         if(expired.isBefore(now)){
-            throw new Exception(MessageConstant.EMAIL_EXPIRED);
+            throw new CustomException(MessageConstant.EMAIL_EXPIRED);
         }else{
             return false;
         }
