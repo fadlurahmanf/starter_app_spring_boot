@@ -45,7 +45,20 @@ public class EmailController {
         }
     }
 
-
+    @PostMapping("/email-registration/request")
+    public ResponseEntity requestEmail(@RequestBody String body){
+        try {
+            JSONObject jsonObject = new JSONObject(body);
+            String email = RequestBodyValidator.isEmailExist(jsonObject);
+            emailService.sendBroadcastEmail(email);
+            emailService.insertNewRegistrationEmail(email);
+            return new ResponseEntity<>(new BaseResponse<>(HttpStatus.OK.value(), MessageConstant.SUCCESS), HttpStatus.OK);
+        } catch (CustomException e){
+            return new ResponseEntity<>(new BaseResponse<>(e.statusCode, e.message), e.httpStatus);
+        } catch (Exception e){
+            return new ResponseEntity<>(new BaseResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
     @GetMapping("/verify-email-registration/{token}")
     public ResponseEntity verifyEmailRegistration(

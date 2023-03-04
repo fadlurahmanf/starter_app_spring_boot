@@ -4,13 +4,9 @@ import com.fadlurahmanf.starter.email.constant.EmailConstant;
 import com.fadlurahmanf.starter.email.constant.EmailType;
 import com.fadlurahmanf.starter.general.constant.MessageConstant;
 import com.fadlurahmanf.starter.general.dto.exception.CustomException;
-import com.fadlurahmanf.starter.general.helper.Utility;
+import com.fadlurahmanf.starter.general.helper.utility.Utility;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
 
 public class EmailHelper {
     public String getRawString(EmailType type){
