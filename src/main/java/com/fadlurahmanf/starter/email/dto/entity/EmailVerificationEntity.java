@@ -2,6 +2,8 @@ package com.fadlurahmanf.starter.email.dto.entity;
 
 import com.fadlurahmanf.starter.general.constant.EntityConstant;
 import jakarta.persistence.*;
+import org.hibernate.annotations.GenericGenerator;
+
 import java.io.Serializable;
 
 @Entity
@@ -13,6 +15,8 @@ public class EmailVerificationEntity implements Serializable {
     public String type;
 
     @Id
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     @Column(name = "token")
     public String token;
 
@@ -26,6 +30,13 @@ public class EmailVerificationEntity implements Serializable {
     public String createdAt;
 
     public EmailVerificationEntity(){}
+
+    public EmailVerificationEntity(String email, String type, String expiredAt){
+        this.email = email;
+        this.type = type;
+        this.isVerified = false;
+        this.expiredAt = expiredAt;
+    }
 
     public EmailVerificationEntity(String email, String type, String token, Boolean isVerified, String expiredAt, String createdAt){
         this.email = email;

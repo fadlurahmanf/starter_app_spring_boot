@@ -1,7 +1,9 @@
 package com.fadlurahmanf.starter.email.handler.service;
 
+import com.fadlurahmanf.starter.email.constant.EmailConstant;
 import com.fadlurahmanf.starter.email.dto.entity.EmailVerificationEntity;
 import com.fadlurahmanf.starter.email.handler.repository.EmailVerificationRepository;
+import com.fadlurahmanf.starter.general.constant.DateFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,8 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -56,5 +60,16 @@ public class EmailService {
 
     public Optional<EmailVerificationEntity> findByToken(String token){
         return emailVerificationRepository.findByToken(token);
+    }
+
+    public void insertNewRegistrationEmail(String email){
+        LocalDateTime now = LocalDateTime.now();
+        String type = EmailConstant.EMAIL_TYPE_REGISTRATION;
+        DateTimeFormatter dtf = DateFormatter.dtf1;
+        emailVerificationRepository.save(new EmailVerificationEntity(
+                email,
+                type,
+                now.plusMinutes(5).format(dtf)
+        ));
     }
 }
