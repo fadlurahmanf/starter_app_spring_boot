@@ -5,6 +5,7 @@ import com.fadlurahmanf.starter.general.constant.PathConstant;
 import com.fadlurahmanf.starter.general.dto.exception.CustomException;
 import com.fadlurahmanf.starter.general.dto.response.BaseResponse;
 import com.fadlurahmanf.starter.general.helper.validator.RequestBodyValidator;
+import com.fadlurahmanf.starter.identity.constant.IdentityURL;
 import com.fadlurahmanf.starter.identity.dto.entity.IdentityEntity;
 import com.fadlurahmanf.starter.identity.handler.service.IdentityService;
 import org.json.JSONObject;
@@ -16,17 +17,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = PathConstant.identityPath)
+@RequestMapping(path = IdentityURL.basePrefix)
 class IdentityController {
     @Autowired
     IdentityService identityService;
 
-    @GetMapping("/tes")
-    public String tes(){
-        return "Hello World";
-    }
-
-    @GetMapping("/list-account")
+    @GetMapping(IdentityURL.pathListAccount)
     public ResponseEntity getListAccount(){
         try {
             return new  ResponseEntity<BaseResponse<List<IdentityEntity>>>(new BaseResponse(HttpStatus.OK.value(), "SUCCESS", identityService.findAll()), HttpStatus.OK);
@@ -35,7 +31,7 @@ class IdentityController {
         }
     }
 
-    @PostMapping("/register")
+    @PostMapping(IdentityURL.pathRegister)
     public ResponseEntity register(@RequestBody String body){
         try {
             JSONObject jsonObject = new JSONObject(body);

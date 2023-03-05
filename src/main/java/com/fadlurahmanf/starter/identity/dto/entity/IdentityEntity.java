@@ -1,9 +1,11 @@
 package com.fadlurahmanf.starter.identity.dto.entity;
 
 import com.fadlurahmanf.starter.general.constant.EntityConstant;
-import jakarta.persistence.*;
 import org.hibernate.annotations.GenericGenerator;
-
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.io.Serializable;
 
 @Entity

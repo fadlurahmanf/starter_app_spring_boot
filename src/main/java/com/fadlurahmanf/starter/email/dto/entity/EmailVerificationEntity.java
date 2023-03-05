@@ -1,9 +1,9 @@
 package com.fadlurahmanf.starter.email.dto.entity;
 
 import com.fadlurahmanf.starter.general.constant.EntityConstant;
-import jakarta.persistence.*;
 import org.hibernate.annotations.GenericGenerator;
 
+import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity

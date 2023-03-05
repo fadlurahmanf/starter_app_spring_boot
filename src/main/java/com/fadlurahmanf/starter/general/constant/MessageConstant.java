@@ -11,4 +11,8 @@ public class MessageConstant {
     public static final String EMAIL_NOT_VALID = "EMAIL_NOT_VALID";
     public static final String EMAIL_NOT_FOUND = "EMAIL_NOT_FOUND";
     public static final String EMAIL_EXPIRED = "EMAIL_EXPIRED";
+    public static final String USER_NOT_FOUND = "USER_NOT_FOUND";
+    public static final String TOKEN_NOT_WITH_BEARER = "TOKEN_NOT_WITH_BEARER";
+    public static final String TOKEN_REQUIRED = "TOKEN_REQUIRED";
+    public static final String UNAUTHORIZED = "UNAUTHORIZED";
 }
