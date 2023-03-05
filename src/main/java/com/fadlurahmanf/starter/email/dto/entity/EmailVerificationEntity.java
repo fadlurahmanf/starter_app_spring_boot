@@ -7,17 +7,17 @@ import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity
-@Table(name = EntityConstant.emailVerification)
+@Table(name = EntityConstant.verificationEmail)
 public class EmailVerificationEntity implements Serializable {
     @Column(name = "email")
     public String email;
-    @Column(name = "type")
+    @Column(name = "email_type")
     public String type;
 
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(name = "token")
+    @Column(name = "email_token")
     public String token;
 
     @Column(name = "is_verified")

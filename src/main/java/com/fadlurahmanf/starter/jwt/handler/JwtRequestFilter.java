@@ -1,5 +1,6 @@
 package com.fadlurahmanf.starter.jwt.handler;
 
+import com.fadlurahmanf.starter.email.constant.EmailURL;
 import com.fadlurahmanf.starter.general.constant.MessageConstant;
 import com.fadlurahmanf.starter.general.dto.exception.CustomIOException;
 import com.fadlurahmanf.starter.general.dto.response.BaseResponse;
@@ -19,10 +20,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Objects;
 
 @Component
@@ -36,9 +33,10 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         return request.getRequestURI().contains("/debug/") ||
-                checkIsNotFiltering(request, IdentityURL.basePrefix, IdentityURL.pathRegister) ||
-                checkIsNotFiltering(request, IdentityURL.basePrefix, IdentityURL.pathLogin) ||
-                checkIsNotFiltering(request, IdentityURL.basePrefix, IdentityURL.pathRefreshToken);
+                isURLEquals(request, IdentityURL.basePrefix, IdentityURL.pathRegister) ||
+                isURLEquals(request, IdentityURL.basePrefix, IdentityURL.pathLogin) ||
+                isURLEquals(request, IdentityURL.basePrefix, IdentityURL.pathRefreshToken) ||
+                isURLEquals(request, EmailURL.basePrefix, EmailURL.pathRequestEmailRegistration);
     }
 
     @Override
@@ -106,7 +104,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         return mapper.writeValueAsString(baseResponse);
     }
 
-    private Boolean checkIsNotFiltering(HttpServletRequest request, String prefix, String path){
+    private Boolean isURLEquals(HttpServletRequest request, String prefix, String path){
         return Objects.equals(request.getRequestURI(), "/" + prefix + path);
+    }
+
+    private Boolean isURLContain(HttpServletRequest request, String prefix, String path){
+        return request.getRequestURI().contains("/" + prefix + path);
     }
 }

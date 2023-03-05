@@ -2,7 +2,6 @@ package com.fadlurahmanf.starter.identity.handler.controller;
 
 import com.fadlurahmanf.starter.email.handler.service.EmailService;
 import com.fadlurahmanf.starter.general.constant.MessageConstant;
-import com.fadlurahmanf.starter.general.constant.PathConstant;
 import com.fadlurahmanf.starter.general.dto.exception.CustomException;
 import com.fadlurahmanf.starter.general.dto.response.BaseResponse;
 import com.fadlurahmanf.starter.general.helper.validator.RequestBodyValidator;
@@ -79,7 +78,6 @@ class IdentityController {
             if(isUserExist){
                 throw new CustomException(MessageConstant.EMAIL_ALREADY_EXIST);
             }
-//            emailService.sendBroadcastEmail(email);
             emailService.insertNewRegistrationEmail(email);
             identityService.saveIdentity(email, password);
             return new  ResponseEntity<BaseResponse<List<IdentityEntity>>>(new BaseResponse(HttpStatus.OK.value(), MessageConstant.SUCCESS), HttpStatus.OK);

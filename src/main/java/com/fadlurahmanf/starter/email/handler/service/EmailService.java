@@ -20,6 +20,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class EmailService {
@@ -66,6 +67,11 @@ public class EmailService {
         LocalDateTime now = LocalDateTime.now();
         String type = EmailConstant.EMAIL_TYPE_REGISTRATION;
         DateTimeFormatter dtf = DateFormatter.dtf1;
+        EmailVerificationEntity newEmail = new EmailVerificationEntity(
+                email,
+                type,
+                now.plusMinutes(5).format(dtf)
+        );
         emailVerificationRepository.save(new EmailVerificationEntity(
                 email,
                 type,
