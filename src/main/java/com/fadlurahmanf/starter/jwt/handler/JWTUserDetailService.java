@@ -17,8 +17,8 @@ import java.util.Optional;
 import java.util.Set;
 
 @Service
-public class JwtUserDetailService implements UserDetailsService {
-    Logger logger = LoggerFactory.getLogger(JwtUserDetailService.class);
+public class JWTUserDetailService implements UserDetailsService {
+    Logger logger = LoggerFactory.getLogger(JWTUserDetailService.class);
     @Autowired
     IdentityRepository identityRepository;
 
@@ -26,7 +26,7 @@ public class JwtUserDetailService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<IdentityEntity> optIdentity = identityRepository.findByEmail(username);
         if(optIdentity.isEmpty()){
-            throw new UsernameNotFoundException(MessageConstant.USER_NOT_FOUND);
+            throw new UsernameNotFoundException(MessageConstant.USER_NOT_EXIST);
         }
 
         IdentityEntity identity = optIdentity.get();

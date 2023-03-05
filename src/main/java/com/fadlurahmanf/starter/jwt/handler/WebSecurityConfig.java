@@ -3,7 +3,6 @@ package com.fadlurahmanf.starter.jwt.handler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -23,7 +22,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Autowired
-    private JwtUserDetailService jwtUserDetailsService;
+    private JWTUserDetailService jwtUserDetailsService;
 
     @Autowired
     private JwtRequestFilter jwtRequestFilter;

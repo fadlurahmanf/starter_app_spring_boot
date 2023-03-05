@@ -24,15 +24,16 @@ import java.util.Objects;
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
     @Autowired
-    JwtTokenUtil jwtTokenUtil;
+    JWTTokenUtil jwtTokenUtil;
 
     @Autowired
-    JwtUserDetailService jwtUserDetailService;
+    JWTUserDetailService jwtUserDetailService;
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         return request.getRequestURI().contains("/debug/") ||
-                checkIsNotFiltering(request, IdentityURL.basePrefix, IdentityURL.pathRegister);
+                checkIsNotFiltering(request, IdentityURL.basePrefix, IdentityURL.pathRegister) ||
+                checkIsNotFiltering(request, IdentityURL.basePrefix, IdentityURL.pathLogin);
     }
 
     @Override
