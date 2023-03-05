@@ -3,11 +3,11 @@ package com.fadlurahmanf.starter.identity.dto.response;
 import java.io.Serializable;
 
 public class LoginResponse implements Serializable {
-    public String jwtToken;
+    public String accessToken;
 
     public LoginResponse(){}
 
     public LoginResponse(String token){
-        jwtToken = token;
+        accessToken = token;
     }
 }

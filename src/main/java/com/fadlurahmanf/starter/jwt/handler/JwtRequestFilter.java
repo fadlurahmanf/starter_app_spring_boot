@@ -58,7 +58,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             try {
                 email = jwtTokenUtil.getUsernameFromToken(jwtToken);
             }catch (Exception e){
-                throw new CustomIOException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+                if(e.getMessage().toLowerCase().contains("EXPIRED".toLowerCase())){
+                    throw new CustomIOException(MessageConstant.TOKEN_EXPIRED, HttpStatus.UNAUTHORIZED);
+                }else{
+                    throw new CustomIOException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+                }
             }
 
             if(email != null && SecurityContextHolder.getContext().getAuthentication() == null){
@@ -74,8 +78,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
         } catch (CustomIOException e){
             setResponseError(response, e.httpStatus, convertObjectToJson(e.httpStatus, e.message));
-        } catch (IOException e){
-            setResponseError(response, HttpStatus.INTERNAL_SERVER_ERROR, convertObjectToJson(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()));
         } catch (Exception e){
             setResponseError(response, HttpStatus.INTERNAL_SERVER_ERROR, convertObjectToJson(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()));
         }

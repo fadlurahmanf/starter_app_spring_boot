@@ -47,7 +47,7 @@ class IdentityController {
         }catch (CustomException e){
             return new ResponseEntity<>(new BaseResponse<>(e.statusCode, e.message), e.httpStatus);
         }catch (Exception e){
-            return new ResponseEntity<>(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(new BaseResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
