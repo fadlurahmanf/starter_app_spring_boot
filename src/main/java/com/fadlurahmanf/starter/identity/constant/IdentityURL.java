@@ -5,4 +5,5 @@ public class IdentityURL {
     public static final String pathListAccount = "/list-account";
     public static final String pathLogin = "/login";
     public static final String pathRegister = "/register";
+    public static final String pathRefreshToken = "/refresh-token";
 }

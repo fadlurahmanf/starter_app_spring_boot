@@ -19,6 +19,10 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Objects;
 
 @Component
@@ -33,7 +37,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         return request.getRequestURI().contains("/debug/") ||
                 checkIsNotFiltering(request, IdentityURL.basePrefix, IdentityURL.pathRegister) ||
-                checkIsNotFiltering(request, IdentityURL.basePrefix, IdentityURL.pathLogin);
+                checkIsNotFiltering(request, IdentityURL.basePrefix, IdentityURL.pathLogin) ||
+                checkIsNotFiltering(request, IdentityURL.basePrefix, IdentityURL.pathRefreshToken);
     }
 
     @Override
@@ -73,13 +78,19 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                     );
                     usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+                }else{
+                    throw new CustomIOException(MessageConstant.TOKEN_NOT_VALID, HttpStatus.UNAUTHORIZED);
                 }
             }
             filterChain.doFilter(request, response);
         } catch (CustomIOException e){
             setResponseError(response, e.httpStatus, convertObjectToJson(e.httpStatus, e.message));
         } catch (Exception e){
-            setResponseError(response, HttpStatus.INTERNAL_SERVER_ERROR, convertObjectToJson(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()));
+            if(e.getMessage() != null && e.getMessage().toLowerCase().contains("EXPIRED".toLowerCase())){
+                setResponseError(response, HttpStatus.UNAUTHORIZED, convertObjectToJson(HttpStatus.UNAUTHORIZED, MessageConstant.TOKEN_EXPIRED));
+            }else{
+                setResponseError(response, HttpStatus.INTERNAL_SERVER_ERROR, convertObjectToJson(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage()));
+            }
         }
     }
 

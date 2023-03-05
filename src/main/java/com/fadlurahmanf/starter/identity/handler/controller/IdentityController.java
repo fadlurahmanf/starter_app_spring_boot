@@ -1,5 +1,6 @@
 package com.fadlurahmanf.starter.identity.handler.controller;
 
+import com.fadlurahmanf.starter.email.handler.service.EmailService;
 import com.fadlurahmanf.starter.general.constant.MessageConstant;
 import com.fadlurahmanf.starter.general.constant.PathConstant;
 import com.fadlurahmanf.starter.general.dto.exception.CustomException;
@@ -23,6 +24,9 @@ class IdentityController {
     @Autowired
     IdentityService identityService;
 
+    @Autowired
+    EmailService emailService;
+
     @GetMapping(IdentityURL.pathListAccount)
     public ResponseEntity getListAccount(){
         try {
@@ -42,8 +46,22 @@ class IdentityController {
             if(!isUserExist){
                 throw new CustomException(MessageConstant.USER_NOT_EXIST);
             }
-            String token = identityService.authenticate(email, password);
-            return new ResponseEntity<>(new BaseResponse<>(HttpStatus.OK.value(), MessageConstant.SUCCESS, new LoginResponse(token)), HttpStatus.OK);
+            LoginResponse loginResponse = identityService.authenticate(email, password);
+            return new ResponseEntity<>(new BaseResponse<>(HttpStatus.OK.value(), MessageConstant.SUCCESS, loginResponse), HttpStatus.OK);
+        }catch (CustomException e){
+            return new ResponseEntity<>(new BaseResponse<>(e.statusCode, e.message), e.httpStatus);
+        }catch (Exception e){
+            return new ResponseEntity<>(new BaseResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping(IdentityURL.pathRefreshToken)
+    public ResponseEntity refreshToken(@RequestBody String body){
+        try {
+            JSONObject jsonObject = new JSONObject(body);
+            String refreshToken = RequestBodyValidator.validateRefreshToken(jsonObject);
+            LoginResponse newRefreshTokenResponse = identityService.authenticateRefreshToken(refreshToken);
+            return new ResponseEntity<>(new BaseResponse<>(HttpStatus.OK.value(), MessageConstant.SUCCESS, newRefreshTokenResponse), HttpStatus.OK);
         }catch (CustomException e){
             return new ResponseEntity<>(new BaseResponse<>(e.statusCode, e.message), e.httpStatus);
         }catch (Exception e){
@@ -61,6 +79,8 @@ class IdentityController {
             if(isUserExist){
                 throw new CustomException(MessageConstant.EMAIL_ALREADY_EXIST);
             }
+//            emailService.sendBroadcastEmail(email);
+            emailService.insertNewRegistrationEmail(email);
             identityService.saveIdentity(email, password);
             return new  ResponseEntity<BaseResponse<List<IdentityEntity>>>(new BaseResponse(HttpStatus.OK.value(), MessageConstant.SUCCESS), HttpStatus.OK);
         }catch (CustomException e){

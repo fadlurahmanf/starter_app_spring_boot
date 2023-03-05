@@ -33,5 +33,17 @@ public class RequestBodyValidator {
         }
     }
 
+    public static String validateRefreshToken(JSONObject jsonObject) throws Exception {
+        String key = "refreshToken";
+        String password = jsonObject.optString(key, null);
+        if(password != null){
+            return jsonObject.getString(key);
+        }else if(jsonObject.optString(key, null).isEmpty()){
+            throw new CustomException(MessageConstant.REFRESH_TOKEN_REQUIRED);
+        }else{
+            throw new CustomException(MessageConstant.REFRESH_TOKEN_REQUIRED);
+        }
+    }
+
 
 }

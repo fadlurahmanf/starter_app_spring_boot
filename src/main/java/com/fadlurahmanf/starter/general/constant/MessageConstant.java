@@ -20,4 +20,7 @@ public class MessageConstant {
     public static final String TOKEN_NOT_WITH_BEARER = "TOKEN_NOT_WITH_BEARER";
     public static final String TOKEN_REQUIRED = "TOKEN_REQUIRED";
     public static final String TOKEN_EXPIRED = "TOKEN_EXPIRED";
+    public static final String TOKEN_NOT_VALID = "TOKEN_NOT_VALID";
+    public static final String REFRESH_TOKEN_REQUIRED = "REFRESH_TOKEN_REQUIRED";
+    public static final String REFRESH_TOKEN_NOT_VALID = "REFRESH_TOKEN_NOT_VALID";
 }
