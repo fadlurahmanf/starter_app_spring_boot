@@ -67,11 +67,6 @@ public class EmailService {
         LocalDateTime now = LocalDateTime.now();
         String type = EmailConstant.EMAIL_TYPE_REGISTRATION;
         DateTimeFormatter dtf = DateFormatter.dtf1;
-        EmailVerificationEntity newEmail = new EmailVerificationEntity(
-                email,
-                type,
-                now.plusMinutes(5).format(dtf)
-        );
         emailVerificationRepository.save(new EmailVerificationEntity(
                 email,
                 type,
