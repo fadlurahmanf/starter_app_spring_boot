@@ -36,7 +36,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 isURLEquals(request, IdentityURL.basePrefix, IdentityURL.pathRegister) ||
                 isURLEquals(request, IdentityURL.basePrefix, IdentityURL.pathLogin) ||
                 isURLEquals(request, IdentityURL.basePrefix, IdentityURL.pathRefreshToken) ||
-                isURLEquals(request, EmailURL.basePrefix, EmailURL.pathRequestEmailRegistration);
+                isURLEquals(request, EmailURL.basePrefix, EmailURL.pathRequestEmailRegistration) ||
+                isURLContain(request, EmailURL.basePrefix, EmailURL.pathVerifyEmailRegistration);
     }
 
     @Override

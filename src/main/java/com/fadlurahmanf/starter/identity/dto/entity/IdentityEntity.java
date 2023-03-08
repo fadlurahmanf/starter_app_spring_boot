@@ -15,24 +15,23 @@ public class IdentityEntity implements Serializable {
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     public String id;
-
     public String email;
-
     public String password;
-
+    public String status;
     public String createdAt;
-
     public IdentityEntity(){}
 
     public IdentityEntity(String email, String password){
         this.email = email;
         this.password = password;
+        this.status = "";
     }
 
-    public IdentityEntity(String id, String email, String password, String createdAt){
+    public IdentityEntity(String id, String email, String password, String status, String createdAt){
         this.id = id;
         this.email = email;
         this.password = password;
+        this.status = status;
         this.createdAt = createdAt;
     }
 }

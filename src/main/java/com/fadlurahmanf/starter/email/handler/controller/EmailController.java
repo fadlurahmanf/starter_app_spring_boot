@@ -8,7 +8,11 @@ import com.fadlurahmanf.starter.general.constant.MessageConstant;
 import com.fadlurahmanf.starter.general.dto.exception.CustomException;
 import com.fadlurahmanf.starter.general.dto.response.BaseResponse;
 import com.fadlurahmanf.starter.general.helper.validator.RequestBodyValidator;
+import com.fadlurahmanf.starter.identity.constant.IdentityStatusConstant;
+import com.fadlurahmanf.starter.identity.handler.service.IdentityService;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,8 +24,13 @@ import java.util.Optional;
 @RestController
 @RequestMapping(path = EmailURL.basePrefix)
 public class EmailController {
+    Logger logger = LoggerFactory.getLogger(EmailController.class);
+
     @Autowired
     EmailService emailService;
+
+    @Autowired
+    IdentityService identityService;
 
     @PostMapping(EmailURL.pathBroadcastEmail)
     public ResponseEntity broadcastEmail(@RequestBody String body){
@@ -77,6 +86,7 @@ public class EmailController {
                     throw new CustomException(MessageConstant.EMAIL_EXPIRED);
                 }
                 emailService.updateIsVerifiedEmail(email.token);
+                identityService.updateStatusIdentity(IdentityStatusConstant.ACTIVE, email.email);
                 return new ResponseEntity<>(new BaseResponse<>(HttpStatus.OK.value(), MessageConstant.SUCCESS), HttpStatus.OK);
             }else{
                 throw new CustomException(MessageConstant.EMAIL_NOT_FOUND);

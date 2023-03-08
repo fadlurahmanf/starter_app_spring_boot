@@ -62,6 +62,7 @@ public class EmailService {
     }
 
     public void insertNewRegistrationEmail(String email){
+        emailVerificationRepository.updateIsVerifiedEmailVerification(email);
         LocalDateTime now = LocalDateTime.now();
         String type = EmailConstant.EMAIL_TYPE_REGISTRATION;
         DateTimeFormatter dtf = DateFormatter.dtf1;

@@ -7,6 +7,8 @@ import com.fadlurahmanf.starter.identity.dto.response.LoginResponse;
 import com.fadlurahmanf.starter.identity.handler.repository.IdentityRepository;
 import com.fadlurahmanf.starter.jwt.handler.JWTTokenUtil;
 import com.fadlurahmanf.starter.jwt.handler.JWTUserDetailService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,6 +24,7 @@ import java.util.Optional;
 
 @Service
 public class IdentityService {
+    Logger logger = LoggerFactory.getLogger(IdentityService.class);
     @Autowired
     IdentityRepository identityRepository;
 
@@ -46,6 +49,15 @@ public class IdentityService {
         return optIdentity.isPresent();
     }
 
+    public String getStatusByEmail(String email) throws CustomException {
+        Optional<IdentityEntity> optIdentity = identityRepository.findByEmail(email);
+        if(optIdentity.isEmpty()){
+            throw new CustomException(MessageConstant.USER_NOT_EXIST);
+        }
+        IdentityEntity identity = optIdentity.get();
+        return identity.status;
+    }
+
     public void saveIdentity(String email, String unEncryptedPassword){
         String encryptedPassword = bCryptPasswordEncoder.encode(unEncryptedPassword);
         identityRepository.save(new IdentityEntity(email, encryptedPassword));
@@ -62,6 +74,16 @@ public class IdentityService {
             throw new CustomException(MessageConstant.BAD_CREDENTIAL, HttpStatus.UNAUTHORIZED);
         }
     }
+
+    public void updateStatusIdentity(String status, String email){
+        identityRepository.updateStatusIdentity(status, email);
+    }
+
+    public void updateIdentity(String status, String email, String unEncryptedPassword){
+        String encryptedPassword = bCryptPasswordEncoder.encode(unEncryptedPassword);
+        identityRepository.updateIdentity(status, email, encryptedPassword);
+    }
+
     public LoginResponse authenticateRefreshToken(String refreshToken) throws CustomException {
         try {
             Boolean isValidRefreshToken = jwtTokenUtil.validateRefreshToken(refreshToken);

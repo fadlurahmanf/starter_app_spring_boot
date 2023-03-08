@@ -5,6 +5,7 @@ import com.fadlurahmanf.starter.general.constant.MessageConstant;
 import com.fadlurahmanf.starter.general.dto.exception.CustomException;
 import com.fadlurahmanf.starter.general.dto.response.BaseResponse;
 import com.fadlurahmanf.starter.general.helper.validator.RequestBodyValidator;
+import com.fadlurahmanf.starter.identity.constant.IdentityStatusConstant;
 import com.fadlurahmanf.starter.identity.constant.IdentityURL;
 import com.fadlurahmanf.starter.identity.dto.entity.IdentityEntity;
 import com.fadlurahmanf.starter.identity.dto.response.LoginResponse;
@@ -16,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping(path = IdentityURL.basePrefix)
@@ -74,12 +76,16 @@ class IdentityController {
             JSONObject jsonObject = new JSONObject(body);
             String email = RequestBodyValidator.validateEmailRequest(jsonObject);
             String password = RequestBodyValidator.validatePasswordRequest(jsonObject);
-            Boolean isUserExist = identityService.isUserExistByEmail(email);
-            if(isUserExist){
+            String statusUser = identityService.getStatusByEmail(email);
+            if(Objects.equals(statusUser, IdentityStatusConstant.ACTIVE) || Objects.equals(statusUser, IdentityStatusConstant.BLOCKED)){
                 throw new CustomException(MessageConstant.EMAIL_ALREADY_EXIST);
+            }else if(Objects.equals(statusUser, IdentityStatusConstant.NEW)){
+                emailService.insertNewRegistrationEmail(email);
+                identityService.updateIdentity(IdentityStatusConstant.NEW, email, password);
+            }else{
+                emailService.insertNewRegistrationEmail(email);
+                identityService.saveIdentity(email, password);
             }
-            emailService.insertNewRegistrationEmail(email);
-            identityService.saveIdentity(email, password);
             return new  ResponseEntity<BaseResponse<List<IdentityEntity>>>(new BaseResponse(HttpStatus.OK.value(), MessageConstant.SUCCESS), HttpStatus.OK);
         }catch (CustomException e){
             return new ResponseEntity<>(new BaseResponse<>(e.statusCode, e.message), e.httpStatus);
