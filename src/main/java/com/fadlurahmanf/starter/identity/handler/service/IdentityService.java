@@ -44,6 +44,10 @@ public class IdentityService {
         return identityRepository.findAll();
     }
 
+    public Optional<IdentityEntity> findByEmail(String email){
+        return identityRepository.findByEmail(email);
+    }
+
     public Boolean isUserExistByEmail(String email){
         Optional<IdentityEntity> optIdentity = identityRepository.findByEmail(email);
         return optIdentity.isPresent();
@@ -110,5 +114,7 @@ public class IdentityService {
         return jwtUserDetailService.loadUserByUsername(email);
     }
 
-
+    public void updateBalance(String email, Double balance){
+        identityRepository.updateBalance(balance, email);
+    }
 }

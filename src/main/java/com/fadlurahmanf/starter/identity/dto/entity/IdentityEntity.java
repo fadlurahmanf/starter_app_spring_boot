@@ -18,6 +18,7 @@ public class IdentityEntity implements Serializable {
     public String email;
     public String password;
     public String status;
+    public Double balance;
     public String createdAt;
     public IdentityEntity(){}
 
@@ -27,11 +28,12 @@ public class IdentityEntity implements Serializable {
         this.status = "";
     }
 
-    public IdentityEntity(String id, String email, String password, String status, String createdAt){
+    public IdentityEntity(String id, String email, String password, String status, Double balance, String createdAt){
         this.id = id;
         this.email = email;
         this.password = password;
         this.status = status;
+        this.balance = balance;
         this.createdAt = createdAt;
     }
 }
