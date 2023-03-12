@@ -1,4 +1,4 @@
-package com.fadlurahmanf.starter.general.helper.configuration;
+package com.fadlurahmanf.starter.email.handler.configuration;
 
 import com.fadlurahmanf.starter.general.constant.PropertyConstant;
 import org.springframework.beans.factory.annotation.Value;
