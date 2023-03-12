@@ -1,6 +1,7 @@
 package com.fadlurahmanf.starter.identity.dto.entity;
 
 import com.fadlurahmanf.starter.general.constant.EntityConstant;
+import com.fadlurahmanf.starter.identity.constant.IdentityStatusConstant;
 import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -25,7 +26,7 @@ public class IdentityEntity implements Serializable {
     public IdentityEntity(String email, String password){
         this.email = email;
         this.password = password;
-        this.status = "";
+        this.status = IdentityStatusConstant.NEW;
     }
 
     public IdentityEntity(String id, String email, String password, String status, Double balance, String createdAt){

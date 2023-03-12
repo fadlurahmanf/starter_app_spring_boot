@@ -15,9 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(path = IdentityURL.basePrefix)
@@ -76,12 +76,15 @@ class IdentityController {
             JSONObject jsonObject = new JSONObject(body);
             String email = RequestBodyValidator.validateEmailRequest(jsonObject);
             String password = RequestBodyValidator.validatePasswordRequest(jsonObject);
-            String statusUser = identityService.getStatusByEmail(email);
-            if(Objects.equals(statusUser, IdentityStatusConstant.ACTIVE) || Objects.equals(statusUser, IdentityStatusConstant.BLOCKED)){
-                throw new CustomException(MessageConstant.EMAIL_ALREADY_EXIST);
-            }else if(Objects.equals(statusUser, IdentityStatusConstant.NEW)){
-                emailService.insertNewRegistrationEmail(email);
-                identityService.updateIdentity(IdentityStatusConstant.NEW, email, password);
+            Optional<IdentityEntity> optIdentity = identityService.findByEmail(email);
+            if(optIdentity.isPresent()){
+                String statusUser = optIdentity.get().status;
+                if(Objects.equals(statusUser, IdentityStatusConstant.ACTIVE) || Objects.equals(statusUser, IdentityStatusConstant.BLOCKED)){
+                    throw new CustomException(MessageConstant.EMAIL_ALREADY_EXIST);
+                } else if (Objects.equals(statusUser, IdentityStatusConstant.NEW)) {
+                    emailService.insertNewRegistrationEmail(email);
+                    identityService.updateIdentity(IdentityStatusConstant.NEW, email, password);
+                }
             }else{
                 emailService.insertNewRegistrationEmail(email);
                 identityService.saveIdentity(email, password);

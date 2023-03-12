@@ -55,11 +55,11 @@ public class IdentityService {
 
     public String getStatusByEmail(String email) throws CustomException {
         Optional<IdentityEntity> optIdentity = identityRepository.findByEmail(email);
-        if(optIdentity.isEmpty()){
-            throw new CustomException(MessageConstant.USER_NOT_EXIST);
+        if(optIdentity.isPresent()){
+            IdentityEntity identity = optIdentity.get();
+            return identity.status;
         }
-        IdentityEntity identity = optIdentity.get();
-        return identity.status;
+        return "";
     }
 
     public void saveIdentity(String email, String unEncryptedPassword){

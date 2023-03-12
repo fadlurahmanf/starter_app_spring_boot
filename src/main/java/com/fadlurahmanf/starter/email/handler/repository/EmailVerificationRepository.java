@@ -23,9 +23,11 @@ public interface EmailVerificationRepository extends JpaRepository<EmailVerifica
     List<EmailVerificationEntity> findByEmail(@Param("email") String email);
 
     @Modifying
-    @Query(value = "UPDATE `" + EntityConstant.verificationEmail + "` SET is_verified = true WHERE email_token = :token", nativeQuery = true, countQuery = "SELECT 1")
-    void updateIsVerifiedEmailVerification(@Param("token") String token);
+    @Query(value = "UPDATE `" + EntityConstant.verificationEmail + "` SET is_verified = true, is_expired = true WHERE email_token = :token", nativeQuery = true, countQuery = "SELECT 1")
+    void setIsVerifiedByToken(@Param("token") String token);
 
-    @Query(value = "INSERT INTO `email-user` (`email`, `email_type`, `token`, `is_verified`, `expired_at`) VALUES (:email, :emailType, :token, :isVerified, :expiredAt)", nativeQuery = true, countQuery = "SELECT 1")
-    void saveManual(@Param("email") String email, @Param("emailType") String type, @Param("token") String token, @Param("isVerified") Boolean isVerified, @Param("expiredAt") String expiredAt);
+    @Modifying
+    @Query(value = "UPDATE `" + EntityConstant.verificationEmail + "` SET is_expired = true WHERE (email = :email AND email_type = :type AND (is_verified = false OR is_expired = false))", nativeQuery = true, countQuery = "SELECT 1")
+    void setExpiredAllEmailByTypeAndEmail(@Param("email") String email, @Param("type") String type);
+
 }
