@@ -1,5 +1,6 @@
 package com.fadlurahmanf.starter.debug.controller;
 
+import com.fadlurahmanf.starter.amqp.service.RabbitMQService;
 import com.fadlurahmanf.starter.debug.service.DebugService;
 import com.fadlurahmanf.starter.identity.dto.entity.IdentityEntity;
 import com.fadlurahmanf.starter.identity.handler.service.IdentityService;
@@ -20,6 +21,9 @@ public class DebugController {
 
     @Autowired
     IdentityService identityService;
+
+    @Autowired
+    RabbitMQService rabbitMQService;
 
     @GetMapping("debug/hello-world")
     public String helloWorld(){
@@ -52,5 +56,13 @@ public class DebugController {
         identity2.balance = identity2.balance - 40000;
         identityService.updateBalance(email2, identity2.balance);
         return "SUCCESS";
+    }
+
+    @PostMapping("debug/tes-rabbitmq")
+    public String tesRabbitMq(@RequestBody String body){
+        JSONObject jsonObject = new JSONObject(body);
+        String message = jsonObject.getString("message");
+        rabbitMQService.sendMessage(message);
+        return "MESSAGE `" + message + "` SUCCESSFULLY SENT TO RABBITMQ SERVER";
     }
 }
