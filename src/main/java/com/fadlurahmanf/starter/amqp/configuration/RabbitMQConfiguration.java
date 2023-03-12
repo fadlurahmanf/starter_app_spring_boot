@@ -1,12 +1,12 @@
 package com.fadlurahmanf.starter.amqp.configuration;
 
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.core.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 public class RabbitMQConfiguration {
@@ -26,14 +26,17 @@ public class RabbitMQConfiguration {
     }
 
     @Bean
-    public TopicExchange exchange(){
-        return new TopicExchange(exchange);
+    public CustomExchange exchange(){
+        Map<String, Object> args = new HashMap<>();
+        args.put("x-delayed-type", "direct");
+        return new CustomExchange(exchange, "x-delayed-message", true, false, args);
     }
 
     @Bean
     public Binding binding(){
         return BindingBuilder.bind(queue())
                 .to(exchange())
-                .with(routingKey);
+                .with(routingKey)
+                .noargs();
     }
 }

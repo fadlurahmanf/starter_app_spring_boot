@@ -1,6 +1,6 @@
 package com.fadlurahmanf.starter.debug.controller;
 
-import com.fadlurahmanf.starter.amqp.service.RabbitMQService;
+import com.fadlurahmanf.starter.amqp.service.RabbitMQProducerService;
 import com.fadlurahmanf.starter.debug.service.DebugService;
 import com.fadlurahmanf.starter.identity.dto.entity.IdentityEntity;
 import com.fadlurahmanf.starter.identity.handler.service.IdentityService;
@@ -8,7 +8,6 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,7 +22,7 @@ public class DebugController {
     IdentityService identityService;
 
     @Autowired
-    RabbitMQService rabbitMQService;
+    RabbitMQProducerService rabbitMQProducerService;
 
     @GetMapping("debug/hello-world")
     public String helloWorld(){
@@ -62,7 +61,7 @@ public class DebugController {
     public String tesRabbitMq(@RequestBody String body){
         JSONObject jsonObject = new JSONObject(body);
         String message = jsonObject.getString("message");
-        rabbitMQService.sendMessage(message);
+        rabbitMQProducerService.sendMessage(message);
         return "MESSAGE `" + message + "` SUCCESSFULLY SENT TO RABBITMQ SERVER";
     }
 }
