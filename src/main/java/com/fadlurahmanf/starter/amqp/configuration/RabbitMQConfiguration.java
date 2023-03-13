@@ -17,12 +17,31 @@ public class RabbitMQConfiguration {
     @Value("${starter_app.rabbitmq.exchange}")
     private String exchange;
 
+    @Value("${starter_app.rabbitmq.dl.queue}")
+    private String dlQueue;
+
+    @Value("${starter_app.rabbitmq.dl.exchange}")
+    private String dlExchange;
+
     @Value("${starter_app.rabbitmq.routingkey}")
     private String routingKey;
+
+    @Value("${starter_app.rabbitmq.dl.routingkey}")
+    private String dlRoutingKey;
 
     @Bean
     public Queue queue(){
         return new Queue(queue);
+    }
+
+    @Bean
+    public Queue DLQueue(){
+        return new Queue(dlQueue);
+    }
+
+    @Bean
+    public DirectExchange DLExchange(){
+        return new DirectExchange(dlExchange);
     }
 
     @Bean
@@ -38,5 +57,12 @@ public class RabbitMQConfiguration {
                 .to(exchange())
                 .with(routingKey)
                 .noargs();
+    }
+
+    @Bean
+    public Binding dlBinding(){
+        return BindingBuilder.bind(DLQueue())
+                .to(DLExchange())
+                .with(dlRoutingKey);
     }
 }
