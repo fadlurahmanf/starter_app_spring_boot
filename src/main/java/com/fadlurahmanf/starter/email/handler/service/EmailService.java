@@ -4,6 +4,7 @@ import com.fadlurahmanf.starter.email.constant.EmailConstant;
 import com.fadlurahmanf.starter.email.dto.entity.EmailVerificationEntity;
 import com.fadlurahmanf.starter.email.handler.repository.EmailVerificationRepository;
 import com.fadlurahmanf.starter.general.constant.DateFormatter;
+import com.fadlurahmanf.starter.general.helper.utility.Utility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,12 +12,12 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
-import org.thymeleaf.spring6.SpringTemplateEngine;
-
+import org.thymeleaf.spring5.SpringTemplateEngine;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -55,7 +56,7 @@ public class EmailService {
     }
 
     public void updateIsVerifiedEmail(String token){
-        emailVerificationRepository.updateIsVerifiedEmailVerification(token);
+        emailVerificationRepository.setIsVerifiedByToken(token);
     }
 
     public Optional<EmailVerificationEntity> findByToken(String token){
@@ -63,13 +64,15 @@ public class EmailService {
     }
 
     public void insertNewRegistrationEmail(String email){
-        LocalDateTime now = LocalDateTime.now();
+        emailVerificationRepository.setExpiredAllEmailByTypeAndEmail(email, EmailConstant.EMAIL_TYPE_REGISTRATION);
+        Date expiredAt = Utility.getExpired();
         String type = EmailConstant.EMAIL_TYPE_REGISTRATION;
-        DateTimeFormatter dtf = DateFormatter.dtf1;
         emailVerificationRepository.save(new EmailVerificationEntity(
                 email,
                 type,
-                now.plusMinutes(5).format(dtf)
+                false,
+                false,
+                expiredAt
         ));
     }
 }

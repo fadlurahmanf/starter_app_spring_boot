@@ -7,6 +7,7 @@ import com.fadlurahmanf.starter.general.dto.exception.CustomException;
 import com.fadlurahmanf.starter.general.helper.utility.Utility;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 public class EmailHelper {
     public String getRawString(EmailType type){
@@ -19,10 +20,9 @@ public class EmailHelper {
         }
     }
 
-    public static boolean isExpired(String time) throws Exception {
-        LocalDateTime expired = Utility.stringToLocalDateTime(time);
-        LocalDateTime now = LocalDateTime.now();
-        if(expired.isBefore(now)){
+    public static boolean isExpired(Date expired) throws Exception {
+        Date now = new Date();
+        if(expired.before(now)){
             throw new CustomException(MessageConstant.EMAIL_EXPIRED);
         }else{
             return false;

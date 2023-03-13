@@ -1,32 +1,42 @@
 package com.fadlurahmanf.starter.email.handler.controller;
 
+import com.fadlurahmanf.starter.email.constant.EmailURL;
 import com.fadlurahmanf.starter.email.dto.entity.EmailVerificationEntity;
 import com.fadlurahmanf.starter.email.handler.service.EmailService;
 import com.fadlurahmanf.starter.email.helper.EmailHelper;
 import com.fadlurahmanf.starter.general.constant.MessageConstant;
-import com.fadlurahmanf.starter.general.constant.PathConstant;
 import com.fadlurahmanf.starter.general.dto.exception.CustomException;
 import com.fadlurahmanf.starter.general.dto.response.BaseResponse;
 import com.fadlurahmanf.starter.general.helper.validator.RequestBodyValidator;
+import com.fadlurahmanf.starter.identity.constant.IdentityStatusConstant;
+import com.fadlurahmanf.starter.identity.handler.service.IdentityService;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.json.JSONObject;
+
 import javax.mail.MessagingException;
 import java.util.Optional;
 
 @RestController
-@RequestMapping(path = PathConstant.emailPath)
+@RequestMapping(path = EmailURL.basePrefix)
 public class EmailController {
+    Logger logger = LoggerFactory.getLogger(EmailController.class);
+
     @Autowired
     EmailService emailService;
 
-    @PostMapping("/broadcast-email")
+    @Autowired
+    IdentityService identityService;
+
+    @PostMapping(EmailURL.pathBroadcastEmail)
     public ResponseEntity broadcastEmail(@RequestBody String body){
         try {
             JSONObject jsonObject = new JSONObject(body);
-            String email = RequestBodyValidator.isEmailExist(jsonObject);
+            String email = RequestBodyValidator.validateEmailRequest(jsonObject);
             emailService.sendBroadcastEmail(email);
             return new ResponseEntity(new BaseResponse<>(HttpStatus.OK.value(), MessageConstant.SUCCESS), HttpStatus.OK);
         }catch (MessagingException e){
@@ -36,7 +46,7 @@ public class EmailController {
         }
     }
 
-    @GetMapping("/verify-email/all")
+    @GetMapping(EmailURL.pathListEmailVerification)
     public ResponseEntity getEmailVerify(){
         try {
             return new ResponseEntity<>(new BaseResponse<>(HttpStatus.OK.value(), MessageConstant.SUCCESS, emailService.emailVerificationRepository.findAll()), HttpStatus.OK);
@@ -45,12 +55,12 @@ public class EmailController {
         }
     }
 
-    @PostMapping("/email-registration/request")
+    @PostMapping(EmailURL.pathRequestEmailRegistration)
     public ResponseEntity requestEmail(@RequestBody String body){
         try {
             JSONObject jsonObject = new JSONObject(body);
-            String email = RequestBodyValidator.isEmailExist(jsonObject);
-            emailService.sendBroadcastEmail(email);
+            String email = RequestBodyValidator.validateEmailRequest(jsonObject);
+//            emailService.sendBroadcastEmail(email);
             emailService.insertNewRegistrationEmail(email);
             return new ResponseEntity<>(new BaseResponse<>(HttpStatus.OK.value(), MessageConstant.SUCCESS), HttpStatus.OK);
         } catch (CustomException e){
@@ -60,7 +70,7 @@ public class EmailController {
         }
     }
 
-    @GetMapping("/verify-email-registration/{token}")
+    @GetMapping(EmailURL.pathVerifyEmailRegistration + "{token}")
     public ResponseEntity verifyEmailRegistration(
             @PathVariable("token") String token
     ){
@@ -76,6 +86,7 @@ public class EmailController {
                     throw new CustomException(MessageConstant.EMAIL_EXPIRED);
                 }
                 emailService.updateIsVerifiedEmail(email.token);
+                identityService.updateStatusIdentity(IdentityStatusConstant.ACTIVE, email.email);
                 return new ResponseEntity<>(new BaseResponse<>(HttpStatus.OK.value(), MessageConstant.SUCCESS), HttpStatus.OK);
             }else{
                 throw new CustomException(MessageConstant.EMAIL_NOT_FOUND);
