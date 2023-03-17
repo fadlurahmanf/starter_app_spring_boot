@@ -60,7 +60,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
             String email = null;
             try {
-                email = jwtTokenUtil.getUsernameFromToken(jwtToken);
+                email = jwtTokenUtil.getEmailFromToken(jwtToken);
             }catch (Exception e){
                 if(e.getMessage().toLowerCase().contains("EXPIRED".toLowerCase())){
                     throw new CustomIOException(MessageConstant.TOKEN_EXPIRED, HttpStatus.UNAUTHORIZED);

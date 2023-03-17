@@ -17,8 +17,13 @@ import java.util.function.Function;
 @Component
 public class JWTTokenUtil implements Serializable {
     private static final long serialVersionUID = -2550185165626007488L;
-    public static final long ACCESS_TOKEN_VALIDITY = 60;
-    public static final long REFRESH_TOKEN_VALIDITY = 120;
+
+
+    @Value("${starter_app.jwt.accesstoken.validity}")
+    private Long ACCESS_TOKEN_VALIDITY;
+
+    @Value("${starter_app.jwt.refreshtoken.validity}")
+    public Long REFRESH_TOKEN_VALIDITY;
 
     @Value("${starter_app.jwt.secret}")
     private String secret;
@@ -26,7 +31,7 @@ public class JWTTokenUtil implements Serializable {
     @Autowired
     private JWTUserDetailService jwtUserDetailService;
 
-    public String getUsernameFromToken(String token) {
+    public String getEmailFromToken(String token) {
         return getClaimFromToken(token, Claims::getSubject);
     }
 
@@ -64,7 +69,7 @@ public class JWTTokenUtil implements Serializable {
     }
 
     public Boolean validateToken(String token, UserDetails userDetails) {
-        final String username = getUsernameFromToken(token);
+        final String username = getEmailFromToken(token);
         final String issuer = getIssuerFromToken(token);
         return username.equals(userDetails.getUsername()) &&
                 !isTokenExpired(token) &&
@@ -87,7 +92,7 @@ public class JWTTokenUtil implements Serializable {
     }
 
     public Boolean validateRefreshToken(String token) {
-        final String username = getUsernameFromToken(token);
+        final String username = getEmailFromToken(token);
         final String issuer = getIssuerFromToken(token);
         final UserDetails userDetails = jwtUserDetailService.loadUserByUsername(username);
         return username.equals(userDetails.getUsername()) &&

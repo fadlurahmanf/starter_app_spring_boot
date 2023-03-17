@@ -16,6 +16,9 @@ public interface IdentityRepository extends JpaRepository<IdentityEntity, Long> 
     @Query(value = "SELECT * FROM `" + EntityConstant.identity + "` WHERE email = :email LIMIT 1", nativeQuery = true, countQuery = "SELECT 1")
     Optional<IdentityEntity> findByEmail(@Param("email") String email);
 
+    @Query(value = "SELECT * FROM `" + EntityConstant.identity + "` WHERE id = :id LIMIT 1", nativeQuery = true, countQuery = "SELECT 1")
+    Optional<IdentityEntity> findByUserId(@Param("id") String email);
+
     @Modifying
     @Query(value = "UPDATE `" + EntityConstant.identity + "` SET status = :status WHERE email = :email", nativeQuery = true, countQuery = "SELECT 1")
     void updateStatusIdentity(@Param("status") String status, @Param("email") String email);
@@ -27,5 +30,9 @@ public interface IdentityRepository extends JpaRepository<IdentityEntity, Long> 
     @Modifying
     @Query(value = "UPDATE `" + EntityConstant.identity + "` SET balance = :balance WHERE email = :email", nativeQuery = true, countQuery = "SELECT 1")
     void updateBalance(@Param("balance") Double balance, @Param("email") String email);
+
+    @Modifying
+    @Query(value = "UPDATE `" + EntityConstant.identity + "` SET fcm_token = :token WHERE id = :id", nativeQuery = true, countQuery = "SELECT 1")
+    void updateFCMTokenByUserId(@Param("id") String id, @Param("token") String token);
 
 }

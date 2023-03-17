@@ -47,6 +47,9 @@ public class IdentityService {
     public Optional<IdentityEntity> findByEmail(String email){
         return identityRepository.findByEmail(email);
     }
+    public Optional<IdentityEntity> findById(String id){
+        return identityRepository.findByUserId(id);
+    }
 
     public Boolean isUserExistByEmail(String email){
         Optional<IdentityEntity> optIdentity = identityRepository.findByEmail(email);
@@ -94,7 +97,7 @@ public class IdentityService {
             if(!isValidRefreshToken){
                 throw new CustomException(MessageConstant.REFRESH_TOKEN_NOT_VALID);
             }
-            String username = jwtTokenUtil.getUsernameFromToken(refreshToken);
+            String username = jwtTokenUtil.getEmailFromToken(refreshToken);
             final UserDetails userDetails = jwtUserDetailService.loadUserByUsername(username);
             String newAccessToken = jwtTokenUtil.generateToken(userDetails);
             String newRefreshToken = jwtTokenUtil.generateRefreshToken(userDetails);
@@ -110,11 +113,36 @@ public class IdentityService {
         }
     }
 
+    public String getUserIdFromToken(String authorizationToken) throws CustomException{
+        if(!authorizationToken.startsWith("Bearer ")){
+            throw new CustomException(MessageConstant.TOKEN_NOT_WITH_BEARER, HttpStatus.UNAUTHORIZED);
+        }
+        String token = authorizationToken.substring(7);
+        String email = jwtTokenUtil.getEmailFromToken(token);
+        Optional<IdentityEntity> optIdentity = identityRepository.findByEmail(email);
+        if(optIdentity.isEmpty()){
+            throw new CustomException(MessageConstant.USER_NOT_EXIST, HttpStatus.UNAUTHORIZED);
+        }
+        return optIdentity.get().id;
+    }
+
+    public IdentityEntity getIdentityFromToken(String authorizationToken) throws CustomException{
+        String userId = getUserIdFromToken(authorizationToken);
+        Optional<IdentityEntity> optIdentity = findById(userId);
+        if(optIdentity.isEmpty()){
+            throw new CustomException(MessageConstant.USER_NOT_EXIST, HttpStatus.UNAUTHORIZED);
+        }
+        return optIdentity.get();
+    }
+
     public UserDetails getUserDetails(String email) throws UsernameNotFoundException {
         return jwtUserDetailService.loadUserByUsername(email);
     }
 
     public void updateBalance(String email, Double balance){
         identityRepository.updateBalance(balance, email);
+    }
+    public void updateFCMToken(String userId, String token){
+        identityRepository.updateFCMTokenByUserId(userId, token);
     }
 }
