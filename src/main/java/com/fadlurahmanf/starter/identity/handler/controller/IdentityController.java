@@ -87,7 +87,7 @@ class IdentityController {
                 }
             }else{
                 emailService.insertNewRegistrationEmail(email);
-                identityService.saveIdentity(email, password);
+                identityService.saveNewIdentity(email, password);
             }
             return new  ResponseEntity<BaseResponse<List<IdentityEntity>>>(new BaseResponse(HttpStatus.OK.value(), MessageConstant.SUCCESS), HttpStatus.OK);
         }catch (CustomException e){

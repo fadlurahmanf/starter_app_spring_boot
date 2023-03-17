@@ -62,9 +62,9 @@ public class IdentityService {
         return "";
     }
 
-    public void saveIdentity(String email, String unEncryptedPassword){
+    public void saveNewIdentity(String email, String unEncryptedPassword){
         String encryptedPassword = bCryptPasswordEncoder.encode(unEncryptedPassword);
-        identityRepository.save(new IdentityEntity(email, encryptedPassword));
+        identityRepository.save(new IdentityEntity(email, encryptedPassword, 0.0));
     }
 
     public LoginResponse authenticate(String email, String password) throws CustomException {

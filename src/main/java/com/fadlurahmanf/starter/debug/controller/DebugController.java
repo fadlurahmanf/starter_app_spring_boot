@@ -2,6 +2,7 @@ package com.fadlurahmanf.starter.debug.controller;
 
 import com.fadlurahmanf.starter.amqp.service.RabbitMQProducerService;
 import com.fadlurahmanf.starter.debug.service.DebugService;
+import com.fadlurahmanf.starter.fcm.handler.service.FCMService;
 import com.fadlurahmanf.starter.identity.dto.entity.IdentityEntity;
 import com.fadlurahmanf.starter.identity.handler.service.IdentityService;
 import org.json.JSONObject;
@@ -9,6 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping
@@ -23,6 +27,9 @@ public class DebugController {
 
     @Autowired
     RabbitMQProducerService rabbitMQProducerService;
+
+    @Autowired
+    FCMService fcmService;
 
     @GetMapping("debug/hello-world")
     public String helloWorld(){
@@ -63,5 +70,21 @@ public class DebugController {
         String message = jsonObject.getString("message");
         rabbitMQProducerService.sendMessage(message);
         return "MESSAGE `" + message + "` SUCCESSFULLY SENT TO RABBITMQ SERVER";
+    }
+
+    @PostMapping("debug/tes-fcm")
+    public String testFcm(@RequestBody String body){
+        JSONObject jsonObject = new JSONObject(body);
+        String token = jsonObject.getString("token");
+        String result;
+        if(jsonObject.optJSONObject("data") != null){
+            Map<String, String> map = new HashMap<String, String>();
+            map.put("tes", "isi tes");
+            map.put("tes2", "isi tes2");
+            result = fcmService.sendMessage(token, map);
+        }else{
+            result = fcmService.sendMessage(token, "title ngasal", "body ngasal");
+        }
+        return result;
     }
 }
