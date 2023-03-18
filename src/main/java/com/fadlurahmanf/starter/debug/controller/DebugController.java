@@ -51,19 +51,6 @@ public class DebugController {
         return "SUCCESS";
     }
 
-    @GetMapping("debug/tes-redis-lock")
-    public String tesLocking(){
-        String email = "tffajari@gmail.com";
-        IdentityEntity identity = identityService.findByEmail(email).get();
-        identity.balance = identity.balance - 11000;
-        identityService.updateBalance(email, identity.balance);
-        String email2 = "tffajari@gmail.com";
-        IdentityEntity identity2 = identityService.findByEmail(email2).get();
-        identity2.balance = identity2.balance - 40000;
-        identityService.updateBalance(email2, identity2.balance);
-        return "SUCCESS";
-    }
-
     @PostMapping("debug/tes-rabbitmq")
     public String tesRabbitMq(@RequestBody String body){
         JSONObject jsonObject = new JSONObject(body);
@@ -103,5 +90,11 @@ public class DebugController {
         String userId = jsonObject.getString("userId");
         logger.info("MASUK SEBELUM GET FCM TOKEN");
         return identityService.getFCMToken(userId);
+    }
+
+    @GetMapping("debug/tes-redis-lock")
+    public String testRedisLock(){
+        identityService.updateBalance();
+        return "SUCCESS";
     }
 }
