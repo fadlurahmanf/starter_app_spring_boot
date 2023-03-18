@@ -10,6 +10,10 @@ import com.fadlurahmanf.starter.jwt.handler.JWTUserDetailService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -142,7 +146,24 @@ public class IdentityService {
     public void updateBalance(String email, Double balance){
         identityRepository.updateBalance(balance, email);
     }
+
+    @CachePut(value = "fcm", key = "#userId")
+    public String updateFCMTokenWithCache(String userId, String token){
+        identityRepository.updateFCMTokenByUserId(userId, token);
+        return token;
+    }
+
     public void updateFCMToken(String userId, String token){
         identityRepository.updateFCMTokenByUserId(userId, token);
+    }
+
+    @Cacheable(value = "fcm", key = "#userId")
+    public String getFCMToken(String userId){
+        Optional<IdentityEntity> optIdentity = findById(userId);
+        if(optIdentity.isEmpty()){
+            return "KOSONG";
+        }else{
+            return "BERHASIL NIHHH " + optIdentity.get().fcmToken;
+        }
     }
 }

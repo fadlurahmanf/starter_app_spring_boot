@@ -87,4 +87,21 @@ public class DebugController {
         }
         return result;
     }
+
+    @PostMapping("debug/tes-put-cache-fcm")
+    public String testPutCacheRedis(@RequestBody String body){
+        JSONObject jsonObject = new JSONObject(body);
+        String userId = jsonObject.getString("userId");
+        String token = jsonObject.getString("fcmToken");
+        identityService.updateFCMTokenWithCache(userId, token);
+        return "SUCCESS";
+    }
+
+    @PostMapping("debug/tes-get-cache-fcm")
+    public String testGetCacheRedis(@RequestBody String body){
+        JSONObject jsonObject = new JSONObject(body);
+        String userId = jsonObject.getString("userId");
+        logger.info("MASUK SEBELUM GET FCM TOKEN");
+        return identityService.getFCMToken(userId);
+    }
 }
