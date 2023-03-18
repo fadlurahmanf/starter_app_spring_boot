@@ -29,10 +29,19 @@ public interface IdentityRepository extends JpaRepository<IdentityEntity, Long> 
 
     @Modifying
     @Query(value = "UPDATE `" + EntityConstant.identity + "` SET balance = :balance WHERE email = :email", nativeQuery = true, countQuery = "SELECT 1")
-    void updateBalance(@Param("balance") Double balance, @Param("email") String email);
+    void updateBalanceByEmail(@Param("balance") Double balance, @Param("email") String email);
+
+    @Modifying
+    @Query(value = "UPDATE `" + EntityConstant.identity + "` SET balance = :balance WHERE id = :id", nativeQuery = true, countQuery = "SELECT 1")
+    void updateBalanceByUserId(@Param("balance") Double balance, @Param("id") String email);
 
     @Modifying
     @Query(value = "UPDATE `" + EntityConstant.identity + "` SET fcm_token = :token WHERE id = :id", nativeQuery = true, countQuery = "SELECT 1")
     void updateFCMTokenByUserId(@Param("id") String id, @Param("token") String token);
+
+    @Modifying
+    @Query(value = "UPDATE `" + EntityConstant.identity + "` SET balance = (balance - (:value)) WHERE id = :id AND (balance - (:value) >= 0)", nativeQuery = true, countQuery = "SELECT 1")
+    void reduceBalanceByUserId(@Param("id") String id, @Param("value") Double balance);
+
 
 }

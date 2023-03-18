@@ -10,10 +10,8 @@ import com.fadlurahmanf.starter.jwt.handler.JWTUserDetailService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.integration.redis.util.RedisLockRegistry;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -47,6 +45,11 @@ public class IdentityService{
 
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    @Autowired
+    RedisLockRegistry redisLockRegistry;
+
+    private static final String MY_LOCK_KEY = "BALANCE-LOCK-KEY";
 
     public List<IdentityEntity> findAll(){
         return identityRepository.findAll();
@@ -147,8 +150,8 @@ public class IdentityService{
         return jwtUserDetailService.loadUserByUsername(email);
     }
 
-    public void updateBalance(String email, Double balance){
-        identityRepository.updateBalance(balance, email);
+    public void updateBalanceByEmail(String email, Double balance){
+        identityRepository.updateBalanceByEmail(balance, email);
     }
 
     @CachePut(value = "fcm", key = "#userId")
@@ -171,12 +174,32 @@ public class IdentityService{
         }
     }
 
-    @Autowired
-    RedisLockRegistry redisLockRegistry;
+    public IdentityEntity getIdentityByUserId(String userId) throws CustomException{
+        Optional<IdentityEntity> optIdentity = findById(userId);
+        if(optIdentity.isEmpty()){
+            throw new CustomException(MessageConstant.USER_NOT_EXIST, HttpStatus.OK);
+        }
+        return optIdentity.get();
+    }
 
-    private static final String MY_LOCK_KEY = "BALANCE-LOCK-KEY";
+    public void updateBalanceByUserId(String userId, Double balance){
+        identityRepository.updateBalanceByUserId(balance, userId);
+    }
 
-    public void updateBalance(){
+    public void reduceBalanceByUserId(String userId, Double balance) throws CustomException {
+        IdentityEntity identity = getIdentityByUserId(userId);
+        if((identity.balance - balance) < 0.0){
+            throw new CustomException(MessageConstant.BALANCE_NOT_ENOUGH, HttpStatus.BAD_REQUEST);
+        }
+        identityRepository.reduceBalanceByUserId(userId, balance);
+    }
+
+    public void addBalanceByUserId(String userId, Double balance) throws CustomException {
+        IdentityEntity identity = getIdentityByUserId(userId);
+        identityRepository.reduceBalanceByUserId(userId, balance);
+    }
+
+    public void updateBalanceExample(){
         var executor = Executors.newFixedThreadPool(2);
         Runnable lockThreadOne = () -> {
             UUID uuid = UUID.randomUUID();

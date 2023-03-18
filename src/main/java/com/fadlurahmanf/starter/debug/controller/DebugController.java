@@ -3,6 +3,7 @@ package com.fadlurahmanf.starter.debug.controller;
 import com.fadlurahmanf.starter.amqp.service.RabbitMQProducerService;
 import com.fadlurahmanf.starter.debug.service.DebugService;
 import com.fadlurahmanf.starter.fcm.handler.service.FCMService;
+import com.fadlurahmanf.starter.general.dto.exception.CustomException;
 import com.fadlurahmanf.starter.identity.dto.entity.IdentityEntity;
 import com.fadlurahmanf.starter.identity.handler.service.IdentityService;
 import org.json.JSONObject;
@@ -47,7 +48,7 @@ public class DebugController {
         JSONObject jsonObject = new JSONObject(body);
         String email = jsonObject.getString("email");
         Double balance = jsonObject.getDouble("balance");
-        identityService.updateBalance(email, balance);
+        identityService.updateBalanceByEmail(email, balance);
         return "SUCCESS";
     }
 
@@ -92,9 +93,16 @@ public class DebugController {
         return identityService.getFCMToken(userId);
     }
 
-    @GetMapping("debug/tes-redis-lock")
-    public String testRedisLock(){
-        identityService.updateBalance();
-        return "SUCCESS";
+    @PostMapping("debug/tes-redis-lock")
+    public String testRedisLock(@RequestBody String body){
+        try {
+            JSONObject jsonObject = new JSONObject(body);
+            String userId = jsonObject.getString("userId");
+            Double balance = jsonObject.getDouble("balance");
+            identityService.reduceBalanceByUserId(userId, balance);
+            return "SUCCESS";
+        }catch (CustomException e){
+            return e.message;
+        }
     }
 }
