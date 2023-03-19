@@ -32,7 +32,7 @@ class IdentityController {
     @GetMapping(IdentityURL.pathListAccount)
     public ResponseEntity getListAccount(){
         try {
-            return new  ResponseEntity<BaseResponse<List<IdentityEntity>>>(new BaseResponse(HttpStatus.OK.value(), "SUCCESS", identityService.findAll()), HttpStatus.OK);
+            return new  ResponseEntity<BaseResponse<List<IdentityEntity>>>(new BaseResponse(HttpStatus.OK.value(), "SUCCESS", identityService.getAllIdentity()), HttpStatus.OK);
         }catch (Exception e){
             return new ResponseEntity<>(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -103,7 +103,7 @@ class IdentityController {
             JSONObject jsonObject = new JSONObject(body);
             String email = RequestBodyValidator.validateEmailRequest(jsonObject);
             String password = RequestBodyValidator.validatePasswordRequest(jsonObject);
-            Optional<IdentityEntity> optIdentity = identityService.findByEmail(email);
+            Optional<IdentityEntity> optIdentity = identityService.getOptionalIdentityByEmail(email);
             if(optIdentity.isPresent()){
                 String statusUser = optIdentity.get().status;
                 if(Objects.equals(statusUser, IdentityStatusConstant.ACTIVE) || Objects.equals(statusUser, IdentityStatusConstant.BLOCKED)){

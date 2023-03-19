@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -97,9 +98,10 @@ public class DebugController {
     public String testRedisLock(@RequestBody String body){
         try {
             JSONObject jsonObject = new JSONObject(body);
-            String userId = jsonObject.getString("userId");
+            String fromUserId = jsonObject.getString("fromUserId");
+            String toUserId = jsonObject.getString("toUserId");
             Double balance = jsonObject.getDouble("balance");
-            identityService.reduceBalanceByUserId(userId, balance);
+            identityService.reduceBalanceByUserId(fromUserId, toUserId, balance);
             return "SUCCESS";
         }catch (CustomException e){
             return e.message;

@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
 
 @Service
 public class IdentityService{
@@ -51,14 +52,14 @@ public class IdentityService{
 
     private static final String MY_LOCK_KEY = "BALANCE-LOCK-KEY";
 
-    public List<IdentityEntity> findAll(){
+    public List<IdentityEntity> getAllIdentity(){
         return identityRepository.findAll();
     }
 
-    public Optional<IdentityEntity> findByEmail(String email){
+    public Optional<IdentityEntity> getOptionalIdentityByEmail(String email){
         return identityRepository.findByEmail(email);
     }
-    public Optional<IdentityEntity> findById(String id){
+    public Optional<IdentityEntity> getOptionalIdentityByUserId(String id){
         return identityRepository.findByUserId(id);
     }
 
@@ -139,7 +140,7 @@ public class IdentityService{
 
     public IdentityEntity getIdentityFromToken(String authorizationToken) throws CustomException{
         String userId = getUserIdFromToken(authorizationToken);
-        Optional<IdentityEntity> optIdentity = findById(userId);
+        Optional<IdentityEntity> optIdentity = getOptionalIdentityByUserId(userId);
         if(optIdentity.isEmpty()){
             throw new CustomException(MessageConstant.USER_NOT_EXIST, HttpStatus.UNAUTHORIZED);
         }
@@ -166,7 +167,7 @@ public class IdentityService{
 
     @Cacheable(value = "fcm", key = "#userId")
     public String getFCMToken(String userId){
-        Optional<IdentityEntity> optIdentity = findById(userId);
+        Optional<IdentityEntity> optIdentity = getOptionalIdentityByUserId(userId);
         if(optIdentity.isEmpty()){
             return "KOSONG";
         }else{
@@ -175,7 +176,7 @@ public class IdentityService{
     }
 
     public IdentityEntity getIdentityByUserId(String userId) throws CustomException{
-        Optional<IdentityEntity> optIdentity = findById(userId);
+        Optional<IdentityEntity> optIdentity = getOptionalIdentityByUserId(userId);
         if(optIdentity.isEmpty()){
             throw new CustomException(MessageConstant.USER_NOT_EXIST, HttpStatus.OK);
         }
@@ -186,12 +187,32 @@ public class IdentityService{
         identityRepository.updateBalanceByUserId(balance, userId);
     }
 
-    public void reduceBalanceByUserId(String userId, Double balance) throws CustomException {
-        IdentityEntity identity = getIdentityByUserId(userId);
-        if((identity.balance - balance) < 0.0){
-            throw new CustomException(MessageConstant.BALANCE_NOT_ENOUGH, HttpStatus.BAD_REQUEST);
+    public void reduceBalanceByUserId(String fromUserId, String toUserId, Double balance) throws CustomException {
+        Lock lock = redisLockRegistry.obtain(MY_LOCK_KEY);
+        IdentityEntity fromIdentity = getIdentityByUserId(fromUserId);
+        try {
+            logger.info("ATTEMPTED TRY LOCK REDUCE BALANCE " + balance.toString() + " BY " + fromIdentity.email);
+            if(lock.tryLock(10, TimeUnit.SECONDS)){
+                logger.info("LOCKED BY " + fromIdentity.email);
+                IdentityEntity toIdentity = getIdentityByUserId(toUserId);
+                if((toIdentity.balance - balance) < 0.0){
+                    throw new CustomException(MessageConstant.BALANCE_NOT_ENOUGH, HttpStatus.BAD_REQUEST);
+                }
+                identityRepository.reduceBalanceByUserId(toUserId, balance);
+            }else{
+                logger.info("FAILED TO LOCK BY " + fromIdentity.email);
+                throw new CustomException(MessageConstant.LOCKING_FROM_ANOTHER_THREAD, HttpStatus.CONFLICT);
+            }
+        }catch (CustomException e){
+            throw e;
+        }catch (Exception e){
+            logger.error("CATCHING ERROR TRY LOCK BY " + fromIdentity.email);
+            logger.error(e.getMessage());
+            throw new CustomException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }finally {
+            lock.unlock();
+            logger.info("UNLOCKED BY " + fromIdentity.email);
         }
-        identityRepository.reduceBalanceByUserId(userId, balance);
     }
 
     public void addBalanceByUserId(String userId, Double balance) throws CustomException {
@@ -199,7 +220,7 @@ public class IdentityService{
         identityRepository.reduceBalanceByUserId(userId, balance);
     }
 
-    public void updateBalanceExample(){
+    public void redisLockExample(){
         var executor = Executors.newFixedThreadPool(2);
         Runnable lockThreadOne = () -> {
             UUID uuid = UUID.randomUUID();

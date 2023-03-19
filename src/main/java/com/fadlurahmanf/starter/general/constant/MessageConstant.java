@@ -24,4 +24,5 @@ public class MessageConstant {
     public static final String REFRESH_TOKEN_REQUIRED = "REFRESH_TOKEN_REQUIRED";
     public static final String REFRESH_TOKEN_NOT_VALID = "REFRESH_TOKEN_NOT_VALID";
     public static final String BALANCE_NOT_ENOUGH = "BALANCE_NOT_ENOUGH";
+    public static final String LOCKING_FROM_ANOTHER_THREAD = "LOCKING_FROM_ANOTHER_THREAD";
 }
