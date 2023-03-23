@@ -9,7 +9,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 @Entity
-@Table(name = EntityConstant.identity)
+@Table(name = EntityConstant.Identity.entity)
 public class IdentityEntity implements Serializable {
     @Id
     @GeneratedValue(generator = "UUID")
@@ -19,7 +19,7 @@ public class IdentityEntity implements Serializable {
     public String password;
     public String status;
     public Double balance;
-    @Column(name = "fcm_token")
+    @Column(name = EntityConstant.Identity.fcmToken)
     public String fcmToken;
 
     public Date createdAt;

@@ -183,6 +183,10 @@ public class IdentityService{
         return optIdentity.get();
     }
 
+    public Optional<IdentityEntity> getOptIdentityByUserId(String userId){
+        return getOptionalIdentityByUserId(userId);
+    }
+
     public void updateBalanceByUserId(String userId, Double balance){
         identityRepository.updateBalanceByUserId(balance, userId);
     }

@@ -8,29 +8,29 @@ import java.io.Serializable;
 import java.util.Date;
 
 @Entity
-@Table(name = EntityConstant.verificationEmail)
+@Table(name = EntityConstant.VerificationEmail.entity)
 public class EmailVerificationEntity implements Serializable {
-    @Column(name = "email")
+    @Column(name = EntityConstant.VerificationEmail.email)
     public String email;
-    @Column(name = "email_type")
+    @Column(name = EntityConstant.VerificationEmail.emailType)
     public String type;
 
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(name = "email_token")
+    @Column(name = EntityConstant.VerificationEmail.emailToken)
     public String token;
 
-    @Column(name = "is_verified")
+    @Column(name = EntityConstant.VerificationEmail.isVerified)
     public Boolean isVerified;
 
-    @Column(name = "is_expired")
+    @Column(name = EntityConstant.VerificationEmail.isExpired)
     public Boolean isExpired;
 
-    @Column(name = "expired_at")
+    @Column(name = EntityConstant.VerificationEmail.expiredAt)
     public Date expiredAt;
 
-    @Column(name = "created_at")
+    @Column(name = EntityConstant.VerificationEmail.createdAt)
     public Date createdAt;
 
     @PrePersist
