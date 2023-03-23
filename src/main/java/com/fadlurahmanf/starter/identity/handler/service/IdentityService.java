@@ -10,7 +10,10 @@ import com.fadlurahmanf.starter.jwt.handler.JWTUserDetailService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
+import org.springframework.integration.redis.util.RedisLockRegistry;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,9 +24,13 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
 
 @Service
-public class IdentityService {
+public class IdentityService{
     Logger logger = LoggerFactory.getLogger(IdentityService.class);
     @Autowired
     IdentityRepository identityRepository;
@@ -40,12 +47,20 @@ public class IdentityService {
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public List<IdentityEntity> findAll(){
+    @Autowired
+    RedisLockRegistry redisLockRegistry;
+
+    private static final String MY_LOCK_KEY = "BALANCE-LOCK-KEY";
+
+    public List<IdentityEntity> getAllIdentity(){
         return identityRepository.findAll();
     }
 
-    public Optional<IdentityEntity> findByEmail(String email){
+    public Optional<IdentityEntity> getOptionalIdentityByEmail(String email){
         return identityRepository.findByEmail(email);
+    }
+    public Optional<IdentityEntity> getOptionalIdentityByUserId(String id){
+        return identityRepository.findByUserId(id);
     }
 
     public Boolean isUserExistByEmail(String email){
@@ -62,9 +77,9 @@ public class IdentityService {
         return "";
     }
 
-    public void saveIdentity(String email, String unEncryptedPassword){
+    public void saveNewIdentity(String email, String unEncryptedPassword){
         String encryptedPassword = bCryptPasswordEncoder.encode(unEncryptedPassword);
-        identityRepository.save(new IdentityEntity(email, encryptedPassword));
+        identityRepository.save(new IdentityEntity(email, encryptedPassword, 0.0));
     }
 
     public LoginResponse authenticate(String email, String password) throws CustomException {
@@ -94,7 +109,7 @@ public class IdentityService {
             if(!isValidRefreshToken){
                 throw new CustomException(MessageConstant.REFRESH_TOKEN_NOT_VALID);
             }
-            String username = jwtTokenUtil.getUsernameFromToken(refreshToken);
+            String username = jwtTokenUtil.getEmailFromToken(refreshToken);
             final UserDetails userDetails = jwtUserDetailService.loadUserByUsername(username);
             String newAccessToken = jwtTokenUtil.generateToken(userDetails);
             String newRefreshToken = jwtTokenUtil.generateRefreshToken(userDetails);
@@ -110,11 +125,147 @@ public class IdentityService {
         }
     }
 
+    public String getUserIdFromToken(String authorizationToken) throws CustomException{
+        if(!authorizationToken.startsWith("Bearer ")){
+            throw new CustomException(MessageConstant.TOKEN_NOT_WITH_BEARER, HttpStatus.UNAUTHORIZED);
+        }
+        String token = authorizationToken.substring(7);
+        String email = jwtTokenUtil.getEmailFromToken(token);
+        Optional<IdentityEntity> optIdentity = identityRepository.findByEmail(email);
+        if(optIdentity.isEmpty()){
+            throw new CustomException(MessageConstant.USER_NOT_EXIST, HttpStatus.UNAUTHORIZED);
+        }
+        return optIdentity.get().id;
+    }
+
+    public IdentityEntity getIdentityFromToken(String authorizationToken) throws CustomException{
+        String userId = getUserIdFromToken(authorizationToken);
+        Optional<IdentityEntity> optIdentity = getOptionalIdentityByUserId(userId);
+        if(optIdentity.isEmpty()){
+            throw new CustomException(MessageConstant.USER_NOT_EXIST, HttpStatus.UNAUTHORIZED);
+        }
+        return optIdentity.get();
+    }
+
     public UserDetails getUserDetails(String email) throws UsernameNotFoundException {
         return jwtUserDetailService.loadUserByUsername(email);
     }
 
-    public void updateBalance(String email, Double balance){
-        identityRepository.updateBalance(balance, email);
+    public void updateBalanceByEmail(String email, Double balance){
+        identityRepository.updateBalanceByEmail(balance, email);
+    }
+
+    @CachePut(value = "fcm", key = "#userId")
+    public String updateFCMTokenWithCache(String userId, String token){
+        identityRepository.updateFCMTokenByUserId(userId, token);
+        return token;
+    }
+
+    public void updateFCMToken(String userId, String token){
+        identityRepository.updateFCMTokenByUserId(userId, token);
+    }
+
+    @Cacheable(value = "fcm", key = "#userId")
+    public String getFCMToken(String userId){
+        Optional<IdentityEntity> optIdentity = getOptionalIdentityByUserId(userId);
+        if(optIdentity.isEmpty()){
+            return "KOSONG";
+        }else{
+            return "BERHASIL NIHHH " + optIdentity.get().fcmToken;
+        }
+    }
+
+    public IdentityEntity getIdentityByUserId(String userId) throws CustomException{
+        Optional<IdentityEntity> optIdentity = getOptionalIdentityByUserId(userId);
+        if(optIdentity.isEmpty()){
+            throw new CustomException(MessageConstant.USER_NOT_EXIST, HttpStatus.OK);
+        }
+        return optIdentity.get();
+    }
+
+    public Optional<IdentityEntity> getOptIdentityByUserId(String userId){
+        return getOptionalIdentityByUserId(userId);
+    }
+
+    public void updateBalanceByUserId(String userId, Double balance){
+        identityRepository.updateBalanceByUserId(balance, userId);
+    }
+
+    public void reduceBalanceByUserId(String fromUserId, String toUserId, Double balance) throws CustomException {
+        Lock lock = redisLockRegistry.obtain(MY_LOCK_KEY);
+        IdentityEntity fromIdentity = getIdentityByUserId(fromUserId);
+        try {
+            logger.info("ATTEMPTED TRY LOCK REDUCE BALANCE " + balance.toString() + " BY " + fromIdentity.email);
+            if(lock.tryLock(10, TimeUnit.SECONDS)){
+                logger.info("LOCKED BY " + fromIdentity.email);
+                IdentityEntity toIdentity = getIdentityByUserId(toUserId);
+                if((toIdentity.balance - balance) < 0.0){
+                    throw new CustomException(MessageConstant.BALANCE_NOT_ENOUGH, HttpStatus.BAD_REQUEST);
+                }
+                identityRepository.reduceBalanceByUserId(toUserId, balance);
+            }else{
+                logger.info("FAILED TO LOCK BY " + fromIdentity.email);
+                throw new CustomException(MessageConstant.LOCKING_FROM_ANOTHER_THREAD, HttpStatus.CONFLICT);
+            }
+        }catch (CustomException e){
+            throw e;
+        }catch (Exception e){
+            logger.error("CATCHING ERROR TRY LOCK BY " + fromIdentity.email);
+            logger.error(e.getMessage());
+            throw new CustomException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }finally {
+            lock.unlock();
+            logger.info("UNLOCKED BY " + fromIdentity.email);
+        }
+    }
+
+    public void addBalanceByUserId(String userId, Double balance) throws CustomException {
+        IdentityEntity identity = getIdentityByUserId(userId);
+        identityRepository.reduceBalanceByUserId(userId, balance);
+    }
+
+    public void redisLockExample(){
+        var executor = Executors.newFixedThreadPool(2);
+        Runnable lockThreadOne = () -> {
+            UUID uuid = UUID.randomUUID();
+            var lock = redisLockRegistry.obtain(MY_LOCK_KEY);
+            try {
+                System.out.println("Attempting to lock with thread: " + uuid);
+                if(lock.tryLock(1, TimeUnit.SECONDS)){
+                    System.out.println("Locked with thread: " + uuid);
+                    Thread.sleep(5000);
+                }
+                else{
+                    System.out.println("failed to lock with thread: " + uuid);
+                }
+            } catch(Exception e0){
+                System.out.println("exception thrown with thread: " + uuid);
+            } finally {
+                lock.unlock();
+                System.out.println("unlocked with thread: " + uuid);
+            }
+        };
+        Runnable lockThreadTwo = () -> {
+            UUID uuid = UUID.randomUUID();
+            var lock = redisLockRegistry.obtain(MY_LOCK_KEY);
+            try {
+                System.out.println("Attempting to lock with thread: " + uuid);
+                if(lock.tryLock(10, TimeUnit.SECONDS)){
+                    System.out.println("Locked with thread: " + uuid);
+                    Thread.sleep(5000);
+                }
+                else{
+                    System.out.println("failed to lock with thread: " + uuid);
+                }
+            } catch(Exception e0){
+                System.out.println("exception thrown with thread: " + uuid);
+            } finally {
+                lock.unlock();
+                System.out.println("unlocked with thread: " + uuid);
+            }
+        };
+        executor.submit(lockThreadOne);
+        executor.submit(lockThreadTwo);
+        executor.shutdown();
     }
 }

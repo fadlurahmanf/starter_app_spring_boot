@@ -3,14 +3,13 @@ package com.fadlurahmanf.starter.identity.dto.entity;
 import com.fadlurahmanf.starter.general.constant.EntityConstant;
 import com.fadlurahmanf.starter.identity.constant.IdentityStatusConstant;
 import org.hibernate.annotations.GenericGenerator;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+
+import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Date;
 
 @Entity
-@Table(name = EntityConstant.identity)
+@Table(name = EntityConstant.Identity.entity)
 public class IdentityEntity implements Serializable {
     @Id
     @GeneratedValue(generator = "UUID")
@@ -20,21 +19,31 @@ public class IdentityEntity implements Serializable {
     public String password;
     public String status;
     public Double balance;
-    public String createdAt;
+    @Column(name = EntityConstant.Identity.fcmToken)
+    public String fcmToken;
+
+    public Date createdAt;
     public IdentityEntity(){}
 
-    public IdentityEntity(String email, String password){
+    @PrePersist()
+    protected void onCreate(){
+        this.createdAt = new Date();
+    }
+
+    public IdentityEntity(String email, String password, Double balance){
         this.email = email;
         this.password = password;
         this.status = IdentityStatusConstant.NEW;
+        this.balance = balance;
     }
 
-    public IdentityEntity(String id, String email, String password, String status, Double balance, String createdAt){
+    public IdentityEntity(String id, String email, String password, String status, Double balance, String fcmToken, Date createdAt){
         this.id = id;
         this.email = email;
         this.password = password;
         this.status = status;
         this.balance = balance;
+        this.fcmToken = fcmToken;
         this.createdAt = createdAt;
     }
 }

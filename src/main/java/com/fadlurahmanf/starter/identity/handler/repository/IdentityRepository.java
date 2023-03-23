@@ -13,19 +13,35 @@ import java.util.Optional;
 @Repository
 @Transactional
 public interface IdentityRepository extends JpaRepository<IdentityEntity, Long> {
-    @Query(value = "SELECT * FROM `" + EntityConstant.identity + "` WHERE email = :email LIMIT 1", nativeQuery = true, countQuery = "SELECT 1")
+    @Query(value = "SELECT * FROM `" + EntityConstant.Identity.entity + "` WHERE " + EntityConstant.Identity.email + " = :email LIMIT 1", nativeQuery = true, countQuery = "SELECT 1")
     Optional<IdentityEntity> findByEmail(@Param("email") String email);
 
+    @Query(value = "SELECT * FROM `" + EntityConstant.Identity.entity + "` WHERE " + EntityConstant.Identity.id + " = :id LIMIT 1", nativeQuery = true, countQuery = "SELECT 1")
+    Optional<IdentityEntity> findByUserId(@Param("id") String email);
+
     @Modifying
-    @Query(value = "UPDATE `" + EntityConstant.identity + "` SET status = :status WHERE email = :email", nativeQuery = true, countQuery = "SELECT 1")
+    @Query(value = "UPDATE `" + EntityConstant.Identity.entity + "` SET " + EntityConstant.Identity.status + " = :status WHERE " + EntityConstant.Identity.email + " = :email", nativeQuery = true, countQuery = "SELECT 1")
     void updateStatusIdentity(@Param("status") String status, @Param("email") String email);
 
     @Modifying
-    @Query(value = "UPDATE `" + EntityConstant.identity + "` SET status = :status, password = :password, created_at = CURRENT_TIMESTAMP WHERE email = :email", nativeQuery = true, countQuery = "SELECT 1")
+    @Query(value = "UPDATE `" + EntityConstant.Identity.entity + "` SET " + EntityConstant.Identity.status + " = :status, " + EntityConstant.Identity.password + " = :password, " + EntityConstant.Identity.createdAt + " = CURRENT_TIMESTAMP WHERE " + EntityConstant.Identity.email + " = :email", nativeQuery = true, countQuery = "SELECT 1")
     void updateIdentity(@Param("status") String status, @Param("email") String email, @Param("password") String password);
 
     @Modifying
-    @Query(value = "UPDATE `" + EntityConstant.identity + "` SET balance = :balance WHERE email = :email", nativeQuery = true, countQuery = "SELECT 1")
-    void updateBalance(@Param("balance") Double balance, @Param("email") String email);
+    @Query(value = "UPDATE `" + EntityConstant.Identity.entity + "` SET " + EntityConstant.Identity.balance + " = :balance WHERE " + EntityConstant.Identity.email + " = :email", nativeQuery = true, countQuery = "SELECT 1")
+    void updateBalanceByEmail(@Param("balance") Double balance, @Param("email") String email);
+
+    @Modifying
+    @Query(value = "UPDATE `" + EntityConstant.Identity.entity + "` SET balance = :balance WHERE " + EntityConstant.Identity.id + " = :id", nativeQuery = true, countQuery = "SELECT 1")
+    void updateBalanceByUserId(@Param("balance") Double balance, @Param("id") String email);
+
+    @Modifying
+    @Query(value = "UPDATE `" + EntityConstant.Identity.entity + "` SET " + EntityConstant.Identity.fcmToken + " = :token WHERE " + EntityConstant.Identity.id + " = :id", nativeQuery = true, countQuery = "SELECT 1")
+    void updateFCMTokenByUserId(@Param("id") String id, @Param("token") String token);
+
+    @Modifying
+    @Query(value = "UPDATE `" + EntityConstant.Identity.entity + "` SET " + EntityConstant.Identity.balance + " = (" + EntityConstant.Identity.balance + " - (:value)) WHERE " + EntityConstant.Identity.id + " = :id AND (" + EntityConstant.Identity.balance + " - (:value) >= 0)", nativeQuery = true, countQuery = "SELECT 1")
+    void reduceBalanceByUserId(@Param("id") String id, @Param("value") Double balance);
+
 
 }

@@ -16,18 +16,18 @@ import java.util.Optional;
 @Transactional
 public interface EmailVerificationRepository extends JpaRepository<EmailVerificationEntity, Long> {
 
-    @Query(value = "SELECT * FROM `" + EntityConstant.verificationEmail + "` WHERE email_token = :token", nativeQuery = true, countQuery = "SELECT 1")
+    @Query(value = "SELECT * FROM `" + EntityConstant.VerificationEmail.entity + "` WHERE " + EntityConstant.VerificationEmail.emailToken + " = :token", nativeQuery = true, countQuery = "SELECT 1")
     Optional<EmailVerificationEntity> findByToken(@Param("token") String token);
 
-    @Query(value = "SELECT * FROM `" + EntityConstant.verificationEmail + "` WHERE email=:email", nativeQuery = true, countQuery = "SELECT 1")
+    @Query(value = "SELECT * FROM `" + EntityConstant.VerificationEmail.entity + "` WHERE " + EntityConstant.VerificationEmail.email + "=:email", nativeQuery = true, countQuery = "SELECT 1")
     List<EmailVerificationEntity> findByEmail(@Param("email") String email);
 
     @Modifying
-    @Query(value = "UPDATE `" + EntityConstant.verificationEmail + "` SET is_verified = true, is_expired = true WHERE email_token = :token", nativeQuery = true, countQuery = "SELECT 1")
+    @Query(value = "UPDATE `" + EntityConstant.VerificationEmail.entity + "` SET " + EntityConstant.VerificationEmail.isVerified + " = true WHERE " + EntityConstant.VerificationEmail.emailToken + " = :token", nativeQuery = true, countQuery = "SELECT 1")
     void setIsVerifiedByToken(@Param("token") String token);
 
     @Modifying
-    @Query(value = "UPDATE `" + EntityConstant.verificationEmail + "` SET is_expired = true WHERE (email = :email AND email_type = :type AND (is_verified = false OR is_expired = false))", nativeQuery = true, countQuery = "SELECT 1")
+    @Query(value = "UPDATE `" + EntityConstant.VerificationEmail.entity + "` SET " + EntityConstant.VerificationEmail.isExpired + " = true WHERE (" + EntityConstant.VerificationEmail.email + " = :email AND " + EntityConstant.VerificationEmail.emailType + " = :type AND (" + EntityConstant.VerificationEmail.isVerified + " = false OR " + EntityConstant.VerificationEmail.isExpired + " = false))", nativeQuery = true, countQuery = "SELECT 1")
     void setExpiredAllEmailByTypeAndEmail(@Param("email") String email, @Param("type") String type);
 
 }

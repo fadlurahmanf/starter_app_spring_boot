@@ -45,5 +45,17 @@ public class RequestBodyValidator {
         }
     }
 
+    public static String validateFCMToken(JSONObject jsonObject) throws Exception {
+        String key = "fcmToken";
+        String token = jsonObject.optString(key, null);
+        if(token != null){
+            return jsonObject.getString(key);
+        }else if(jsonObject.optString(key, null).isEmpty()){
+            throw new CustomException(MessageConstant.TOKEN_REQUIRED);
+        }else{
+            throw new CustomException(MessageConstant.TOKEN_REQUIRED);
+        }
+    }
+
 
 }
