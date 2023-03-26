@@ -55,9 +55,8 @@ public class EmailController {
     }
 
     @PostMapping(EmailURL.pathRequestEmailRegistration)
-    public ResponseEntity requestEmail(@RequestBody String body){
+    public ResponseEntity requestEmail(@RequestBody JSONObject jsonObject){
         try {
-            JSONObject jsonObject = new JSONObject(body);
             String email = RequestBodyValidator.validateEmailRequest(jsonObject);
 //            emailService.sendBroadcastEmail(email);
             emailService.insertNewRegistrationEmail(email);

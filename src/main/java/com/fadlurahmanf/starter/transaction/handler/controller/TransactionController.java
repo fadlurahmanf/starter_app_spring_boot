@@ -14,8 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Random;
-
 @RestController
 @RequestMapping(path = TransactionURL.url)
 public class TransactionController {
@@ -28,9 +26,8 @@ public class TransactionController {
     Double tesBalance = 2000.0;
 
     @PostMapping(path = TransactionURL.fundTransfer)
-    public ResponseEntity fundTransfer(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorization, @RequestBody String body){
+    public ResponseEntity fundTransfer(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorization, @RequestBody JSONObject jsonObject){
         try {
-            JSONObject jsonObject = new JSONObject(body);
             tesBalance += 1;
             IdentityEntity identity = identityService.getIdentityFromToken(authorization);
             service.fundTransfer(identity.id, "e8a8b64f-b833-4602-a8a3-6fed67f90911", tesBalance);

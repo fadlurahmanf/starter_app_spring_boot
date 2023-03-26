@@ -39,9 +39,8 @@ class IdentityController {
     }
 
     @PostMapping(IdentityURL.pathLogin)
-    public ResponseEntity login(@RequestBody String body){
+    public ResponseEntity login(@RequestBody JSONObject jsonObject){
         try {
-            JSONObject jsonObject = new JSONObject(body);
             String email = RequestBodyValidator.validateEmailRequest(jsonObject);
             String password = RequestBodyValidator.validatePasswordRequest(jsonObject);
             Boolean isUserExist = identityService.isUserExistByEmail(email);
@@ -58,9 +57,8 @@ class IdentityController {
     }
 
     @PostMapping(IdentityURL.pathRefreshToken)
-    public ResponseEntity refreshToken(@RequestBody String body){
+    public ResponseEntity refreshToken(@RequestBody JSONObject jsonObject){
         try {
-            JSONObject jsonObject = new JSONObject(body);
             String refreshToken = RequestBodyValidator.validateRefreshToken(jsonObject);
             LoginResponse newRefreshTokenResponse = identityService.authenticateRefreshToken(refreshToken);
             return new ResponseEntity<>(new BaseResponse<>(HttpStatus.OK.value(), MessageConstant.SUCCESS, newRefreshTokenResponse), HttpStatus.OK);
@@ -83,9 +81,8 @@ class IdentityController {
     }
 
     @PostMapping(IdentityURL.pathUpdateFCMToken)
-    public ResponseEntity updateFCMToken(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorization, @RequestBody String body){
+    public ResponseEntity updateFCMToken(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorization, @RequestBody JSONObject jsonObject){
         try {
-            JSONObject jsonObject = new JSONObject(body);
             RequestBodyValidator.validateFCMToken(jsonObject);
             IdentityEntity identity = identityService.getIdentityFromToken(authorization);
             identityService.updateFCMToken(identity.id, jsonObject.getString("fcmToken"));
@@ -98,9 +95,8 @@ class IdentityController {
     }
 
     @PostMapping(IdentityURL.pathRegister)
-    public ResponseEntity register(@RequestBody String body){
+    public ResponseEntity register(@RequestBody JSONObject jsonObject){
         try {
-            JSONObject jsonObject = new JSONObject(body);
             String email = RequestBodyValidator.validateEmailRequest(jsonObject);
             String password = RequestBodyValidator.validatePasswordRequest(jsonObject);
             Optional<IdentityEntity> optIdentity = identityService.getOptionalIdentityByEmail(email);
