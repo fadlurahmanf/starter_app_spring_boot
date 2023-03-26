@@ -25,7 +25,11 @@ public interface IdentityRepository extends JpaRepository<IdentityEntity, Long> 
 
     @Modifying
     @Query(value = "UPDATE `" + EntityConstant.Identity.entity + "` SET " + EntityConstant.Identity.status + " = :status, " + EntityConstant.Identity.password + " = :password, " + EntityConstant.Identity.createdAt + " = CURRENT_TIMESTAMP WHERE " + EntityConstant.Identity.email + " = :email", nativeQuery = true, countQuery = "SELECT 1")
-    void updateIdentity(@Param("status") String status, @Param("email") String email, @Param("password") String password);
+    void updateStatusAndPasswordByEmail(@Param("status") String status, @Param("email") String email, @Param("password") String password);
+
+    @Modifying
+    @Query(value = "UPDATE `" + EntityConstant.Identity.entity + "` SET " + EntityConstant.Identity.pin + " = :pin WHERE " + EntityConstant.Identity.id + " = :id", nativeQuery = true, countQuery = "SELECT 1")
+    void updatePinByUserId(@Param("id") String id, @Param("pin") String pin);
 
     @Modifying
     @Query(value = "UPDATE `" + EntityConstant.Identity.entity + "` SET " + EntityConstant.Identity.balance + " = :balance WHERE " + EntityConstant.Identity.email + " = :email", nativeQuery = true, countQuery = "SELECT 1")

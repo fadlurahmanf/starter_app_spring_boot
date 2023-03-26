@@ -12,9 +12,15 @@ public class MessageConstant {
     public static final String EMAIL_EXPIRED = "EMAIL_EXPIRED";
 
     public static final String USER_NOT_EXIST = "USER_NOT_EXIST";
+    public static final String USER_NOT_ACTIVE_YET = "USER_NOT_ACTIVE_YET";
 
     public static final String PASSWORD_REQUIRED = "PASSWORD_REQUIRED";
+    public static final String BAD_PASSWORD = "BAD_PASSWORD";
     public static final String BAD_CREDENTIAL = "BAD_CREDENTIAL";
+    public static final String PIN_REQUIRED = "PIN_REQUIRED";
+    public static final String PIN_EXPIRED = "PIN_EXPIRED";
+    public static final String BAD_PIN = "BAD_PIN";
+    public static final String PIN_NOT_VALID = "PIN_NOT_VALID";
     public static final String UNAUTHORIZED = "UNAUTHORIZED";
 
     public static final String TOKEN_NOT_WITH_BEARER = "TOKEN_NOT_WITH_BEARER";

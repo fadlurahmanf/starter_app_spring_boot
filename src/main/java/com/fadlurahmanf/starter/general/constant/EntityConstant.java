@@ -9,6 +9,7 @@ public class EntityConstant {
         public static final String id = "id";
         public static final String email = "email";
         public static final String password = "password";
+        public static final String pin = "pin";
         public static final String status = "status";
         public static final String balance = "balance";
         public static final String fcmToken = "fcm_token";
@@ -37,6 +38,16 @@ public class EntityConstant {
         public static final String fromUserId = "from_user_id";
         public static final String toUserId = "to_user_id";
         public static final String balance = "balance";
+        public static final String createdAt = "created_at";
+    }
+
+    public static class PinVerification {
+        public static final String entity = "pin_verification";
+
+        // row
+        public static final String userId = "user_id";
+        public static final String pinToken = "pin_token";
+        public static final String isUsed = "is_used";
         public static final String createdAt = "created_at";
     }
 }

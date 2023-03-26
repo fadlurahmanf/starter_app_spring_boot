@@ -101,4 +101,10 @@ public class DebugController {
             return e.message;
         }
     }
+
+    @PostMapping("debug/create-pin-identity")
+    public String createPinIdentity(@RequestBody JSONObject jsonObject){
+        String userId = jsonObject.getString("userId");
+        return "SUCCESS";
+    }
 }

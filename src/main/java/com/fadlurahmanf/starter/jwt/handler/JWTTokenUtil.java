@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
@@ -24,6 +23,9 @@ public class JWTTokenUtil implements Serializable {
 
     @Value("${starter_app.jwt.refreshtoken.validity}")
     public Long REFRESH_TOKEN_VALIDITY;
+
+    @Value("${starter_app.jwt.pintoken.validity}")
+    public Long PIN_TOKEN_VALIDITY;
 
     @Value("${starter_app.jwt.secret}")
     private String secret;
@@ -97,6 +99,30 @@ public class JWTTokenUtil implements Serializable {
         final UserDetails userDetails = jwtUserDetailService.loadUserByUsername(username);
         return username.equals(userDetails.getUsername()) &&
                 issuer.equals("REFRESH_TOKEN") &&
+                !isTokenExpired(token);
+    }
+
+    public String generatePINToken(UserDetails userDetails){
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("TYPE", "PIN_TOKEN");
+        claims.put("USERNAME", userDetails.getUsername());
+        claims.put("PASSWORD", userDetails.getPassword());
+        return doGeneratePinToken(claims, userDetails.getUsername());
+    }
+
+    private String doGeneratePinToken(Map<String, Object> claims, String subject){
+        return Jwts.builder().setClaims(claims).setIssuer("PIN_TOKEN").setSubject(subject)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + (PIN_TOKEN_VALIDITY * 1000)))
+                .signWith(SignatureAlgorithm.HS512, secret).compact();
+    }
+
+    public Boolean validatePinToken(String token) {
+        final String username = getEmailFromToken(token);
+        final String issuer = getIssuerFromToken(token);
+        final UserDetails userDetails = jwtUserDetailService.loadUserByUsername(username);
+        return username.equals(userDetails.getUsername()) &&
+                issuer.equals("PIN_TOKEN") &&
                 !isTokenExpired(token);
     }
 }

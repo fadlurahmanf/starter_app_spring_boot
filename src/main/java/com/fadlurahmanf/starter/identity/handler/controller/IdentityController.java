@@ -8,6 +8,8 @@ import com.fadlurahmanf.starter.general.helper.validator.RequestBodyValidator;
 import com.fadlurahmanf.starter.identity.constant.IdentityStatusConstant;
 import com.fadlurahmanf.starter.identity.constant.IdentityURL;
 import com.fadlurahmanf.starter.identity.dto.entity.IdentityEntity;
+import com.fadlurahmanf.starter.identity.dto.request.CreatePinRequest;
+import com.fadlurahmanf.starter.identity.dto.request.LoginRequest;
 import com.fadlurahmanf.starter.identity.dto.response.LoginResponse;
 import com.fadlurahmanf.starter.identity.handler.service.IdentityService;
 import org.json.JSONObject;
@@ -39,13 +41,13 @@ class IdentityController {
     }
 
     @PostMapping(IdentityURL.pathLogin)
-    public ResponseEntity login(@RequestBody JSONObject jsonObject){
+    public ResponseEntity<BaseResponse<LoginResponse>> login(@RequestBody LoginRequest body){
         try {
-            String email = RequestBodyValidator.validateEmailRequest(jsonObject);
-            String password = RequestBodyValidator.validatePasswordRequest(jsonObject);
+            String email = RequestBodyValidator.validateEmailRequest(body.email);
+            String password = RequestBodyValidator.validateCreatePasswordRequest(body.password);
             Boolean isUserExist = identityService.isUserExistByEmail(email);
             if(!isUserExist){
-                throw new CustomException(MessageConstant.USER_NOT_EXIST);
+                throw new CustomException(MessageConstant.USER_NOT_EXIST, HttpStatus.UNAUTHORIZED);
             }
             LoginResponse loginResponse = identityService.authenticate(email, password);
             return new ResponseEntity<>(new BaseResponse<>(HttpStatus.OK.value(), MessageConstant.SUCCESS, loginResponse), HttpStatus.OK);
@@ -57,7 +59,7 @@ class IdentityController {
     }
 
     @PostMapping(IdentityURL.pathRefreshToken)
-    public ResponseEntity refreshToken(@RequestBody JSONObject jsonObject){
+    public ResponseEntity<BaseResponse<LoginResponse>> refreshToken(@RequestBody JSONObject jsonObject){
         try {
             String refreshToken = RequestBodyValidator.validateRefreshToken(jsonObject);
             LoginResponse newRefreshTokenResponse = identityService.authenticateRefreshToken(refreshToken);
@@ -70,7 +72,7 @@ class IdentityController {
     }
 
     @GetMapping(IdentityURL.pathMyAccountInfo)
-    public ResponseEntity getMyAccountInfo(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorization){
+    public ResponseEntity<BaseResponse<IdentityEntity>> getMyAccountInfo(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorization){
         try {
             return new ResponseEntity<>(new BaseResponse<>(HttpStatus.OK.value(), MessageConstant.SUCCESS, identityService.getIdentityFromToken(authorization)), HttpStatus.OK);
         }catch (CustomException e){
@@ -98,7 +100,7 @@ class IdentityController {
     public ResponseEntity register(@RequestBody JSONObject jsonObject){
         try {
             String email = RequestBodyValidator.validateEmailRequest(jsonObject);
-            String password = RequestBodyValidator.validatePasswordRequest(jsonObject);
+            String password = RequestBodyValidator.validateCreatePasswordRequest(jsonObject);
             Optional<IdentityEntity> optIdentity = identityService.getOptionalIdentityByEmail(email);
             if(optIdentity.isPresent()){
                 String statusUser = optIdentity.get().status;
@@ -106,12 +108,24 @@ class IdentityController {
                     throw new CustomException(MessageConstant.EMAIL_ALREADY_EXIST);
                 } else if (Objects.equals(statusUser, IdentityStatusConstant.NEW)) {
                     emailService.insertNewRegistrationEmail(email);
-                    identityService.updateIdentity(IdentityStatusConstant.NEW, email, password);
+                    identityService.updateStatusAndPasswordByEmail(IdentityStatusConstant.NEW, email, password);
                 }
             }else{
                 emailService.insertNewRegistrationEmail(email);
                 identityService.saveNewIdentity(email, password);
             }
+            return new  ResponseEntity<BaseResponse<List<IdentityEntity>>>(new BaseResponse(HttpStatus.OK.value(), MessageConstant.SUCCESS), HttpStatus.OK);
+        }catch (CustomException e){
+            return new ResponseEntity<>(new BaseResponse<>(e.statusCode, e.message), e.httpStatus);
+        }catch (Exception e){
+            return new ResponseEntity<>(new BaseResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping(IdentityURL.pathCreatePin)
+    public ResponseEntity createPin(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorization, @RequestBody CreatePinRequest body){
+        try {
+            identityService.saveNewPin(authorization, body.pin);
             return new  ResponseEntity<BaseResponse<List<IdentityEntity>>>(new BaseResponse(HttpStatus.OK.value(), MessageConstant.SUCCESS), HttpStatus.OK);
         }catch (CustomException e){
             return new ResponseEntity<>(new BaseResponse<>(e.statusCode, e.message), e.httpStatus);

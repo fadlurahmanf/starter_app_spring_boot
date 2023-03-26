@@ -17,6 +17,7 @@ public class IdentityEntity implements Serializable {
     public String id;
     public String email;
     public String password;
+    public String pin;
     public String status;
     public Double balance;
     @Column(name = EntityConstant.Identity.fcmToken)
@@ -37,7 +38,7 @@ public class IdentityEntity implements Serializable {
         this.balance = balance;
     }
 
-    public IdentityEntity(String id, String email, String password, String status, Double balance, String fcmToken, Date createdAt){
+    public IdentityEntity(String id, String email, String password, String pin, String status, Double balance, String fcmToken, Date createdAt){
         this.id = id;
         this.email = email;
         this.password = password;

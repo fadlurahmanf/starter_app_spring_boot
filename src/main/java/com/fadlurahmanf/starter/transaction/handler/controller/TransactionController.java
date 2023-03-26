@@ -5,6 +5,7 @@ import com.fadlurahmanf.starter.general.dto.exception.CustomException;
 import com.fadlurahmanf.starter.general.dto.response.BaseResponse;
 import com.fadlurahmanf.starter.identity.dto.entity.IdentityEntity;
 import com.fadlurahmanf.starter.identity.handler.service.IdentityService;
+import com.fadlurahmanf.starter.pin_verification.handler.service.PinVerificationService;
 import com.fadlurahmanf.starter.transaction.constant.TransactionURL;
 import com.fadlurahmanf.starter.transaction.dto.request.FundTransferRequest;
 import com.fadlurahmanf.starter.transaction.handler.service.TransactionService;
@@ -26,6 +27,9 @@ public class TransactionController {
     @Autowired
     TransactionService service;
 
+    @Autowired
+    PinVerificationService pinVerificationService;
+
     Double tesBalance = 2000.0;
 
     @PostMapping(path = TransactionURL.fundTransfer)
@@ -36,6 +40,7 @@ public class TransactionController {
         try {
             tesBalance += 1;
             IdentityEntity identity = identityService.getIdentityFromToken(authorization);
+            pinVerificationService.validatePinToken(authorization, body.pinToken);
             service.fundTransfer(identity.id, "e8a8b64f-b833-4602-a8a3-6fed67f90911", tesBalance);
             return new ResponseEntity<>(new BaseResponse<>(HttpStatus.OK.value(), MessageConstant.SUCCESS), HttpStatus.OK);
         } catch (CustomException e) {

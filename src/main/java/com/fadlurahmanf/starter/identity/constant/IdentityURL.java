@@ -8,4 +8,5 @@ public class IdentityURL {
     public static final String pathRefreshToken = "/refresh-token";
     public static final String pathMyAccountInfo = "/my-account-info";
     public static final String pathUpdateFCMToken = "/update-fcm-token";
+    public static final String pathCreatePin = "/pin/create";
 }

@@ -2,6 +2,7 @@ package com.fadlurahmanf.starter.identity.handler.service;
 
 import com.fadlurahmanf.starter.general.constant.MessageConstant;
 import com.fadlurahmanf.starter.general.dto.exception.CustomException;
+import com.fadlurahmanf.starter.identity.constant.IdentityStatusConstant;
 import com.fadlurahmanf.starter.identity.dto.entity.IdentityEntity;
 import com.fadlurahmanf.starter.identity.dto.response.LoginResponse;
 import com.fadlurahmanf.starter.identity.handler.repository.IdentityRepository;
@@ -23,6 +24,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Executors;
@@ -98,9 +100,9 @@ public class IdentityService{
         identityRepository.updateStatusIdentity(status, email);
     }
 
-    public void updateIdentity(String status, String email, String unEncryptedPassword){
+    public void updateStatusAndPasswordByEmail(String status, String email, String unEncryptedPassword){
         String encryptedPassword = bCryptPasswordEncoder.encode(unEncryptedPassword);
-        identityRepository.updateIdentity(status, email, encryptedPassword);
+        identityRepository.updateStatusAndPasswordByEmail(status, email, encryptedPassword);
     }
 
     public LoginResponse authenticateRefreshToken(String refreshToken) throws CustomException {
@@ -125,6 +127,24 @@ public class IdentityService{
         }
     }
 
+    public String authenticatePin(String authorizationToken, String pin) throws CustomException {
+        IdentityEntity identity = getActiveIdentityFromToken(authorizationToken);
+        if(bCryptPasswordEncoder.matches(pin, identity.pin)){
+            return pin;
+        }else{
+            throw new CustomException(MessageConstant.PIN_NOT_VALID, HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    public void saveNewPin(String authorizationToken, String rawPin) throws CustomException {
+        if(rawPin.length() != 6){
+            throw new CustomException(MessageConstant.TOKEN_NOT_VALID, HttpStatus.BAD_REQUEST);
+        }
+        IdentityEntity identity = getActiveIdentityFromToken(authorizationToken);
+        String encryptedPin = bCryptPasswordEncoder.encode(rawPin);
+        identityRepository.updatePinByUserId(identity.id, encryptedPin);
+    }
+
     public String getUserIdFromToken(String authorizationToken) throws CustomException{
         if(!authorizationToken.startsWith("Bearer ")){
             throw new CustomException(MessageConstant.TOKEN_NOT_WITH_BEARER, HttpStatus.UNAUTHORIZED);
@@ -145,6 +165,19 @@ public class IdentityService{
             throw new CustomException(MessageConstant.USER_NOT_EXIST, HttpStatus.UNAUTHORIZED);
         }
         return optIdentity.get();
+    }
+
+    public IdentityEntity getActiveIdentityFromToken(String authorizationToken) throws CustomException{
+        String userId = getUserIdFromToken(authorizationToken);
+        Optional<IdentityEntity> optIdentity = getOptionalIdentityByUserId(userId);
+        if(optIdentity.isEmpty()){
+            throw new CustomException(MessageConstant.USER_NOT_EXIST, HttpStatus.UNAUTHORIZED);
+        }
+        if(Objects.equals(optIdentity.get().status, IdentityStatusConstant.ACTIVE)){
+            return optIdentity.get();
+        }else{
+            throw new CustomException(MessageConstant.USER_NOT_ACTIVE_YET, HttpStatus.UNAUTHORIZED);
+        }
     }
 
     public UserDetails getUserDetails(String email) throws UsernameNotFoundException {
