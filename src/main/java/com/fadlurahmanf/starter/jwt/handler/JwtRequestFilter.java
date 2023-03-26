@@ -110,8 +110,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     }
 
     private Boolean isURLEquals(HttpServletRequest request, String prefix, String path){
-        System.out.println("request nya " + request.getRequestURI());
-        System.out.println("filter nya " + "/" + prefix + path);
         return Objects.equals(request.getRequestURI(), "/" + prefix + path);
     }
 

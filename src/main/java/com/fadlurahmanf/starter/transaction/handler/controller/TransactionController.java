@@ -6,7 +6,10 @@ import com.fadlurahmanf.starter.general.dto.response.BaseResponse;
 import com.fadlurahmanf.starter.identity.dto.entity.IdentityEntity;
 import com.fadlurahmanf.starter.identity.handler.service.IdentityService;
 import com.fadlurahmanf.starter.transaction.constant.TransactionURL;
+import com.fadlurahmanf.starter.transaction.dto.request.FundTransferRequest;
 import com.fadlurahmanf.starter.transaction.handler.service.TransactionService;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -26,7 +29,10 @@ public class TransactionController {
     Double tesBalance = 2000.0;
 
     @PostMapping(path = TransactionURL.fundTransfer)
-    public ResponseEntity fundTransfer(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorization, @RequestBody JSONObject jsonObject){
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Successfully Post Fund Transfer")
+    })
+    public ResponseEntity<BaseResponse<String>> fundTransfer(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorization, @RequestBody FundTransferRequest body){
         try {
             tesBalance += 1;
             IdentityEntity identity = identityService.getIdentityFromToken(authorization);
