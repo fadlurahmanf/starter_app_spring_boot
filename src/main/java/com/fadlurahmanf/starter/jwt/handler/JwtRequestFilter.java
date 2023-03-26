@@ -5,6 +5,7 @@ import com.fadlurahmanf.starter.general.constant.MessageConstant;
 import com.fadlurahmanf.starter.general.dto.exception.CustomIOException;
 import com.fadlurahmanf.starter.general.dto.response.BaseResponse;
 import com.fadlurahmanf.starter.identity.constant.IdentityURL;
+import com.fadlurahmanf.starter.swagger.configuration.SwaggerURL;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,8 +34,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         return request.getRequestURI().contains("/debug/") ||
+                isURLContain(request, "v2/api-docs") ||
+                isURLContain(request, "swagger") ||
                 isURLEquals(request, IdentityURL.basePrefix, IdentityURL.pathRegister) ||
                 isURLEquals(request, IdentityURL.basePrefix, IdentityURL.pathLogin) ||
+                isURLEquals(request, IdentityURL.basePrefix, IdentityURL.pathListAccount) ||
                 isURLEquals(request, IdentityURL.basePrefix, IdentityURL.pathRefreshToken) ||
                 isURLEquals(request, EmailURL.basePrefix, EmailURL.pathRequestEmailRegistration) ||
                 isURLContain(request, EmailURL.basePrefix, EmailURL.pathVerifyEmailRegistration);
@@ -106,10 +110,20 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     }
 
     private Boolean isURLEquals(HttpServletRequest request, String prefix, String path){
+        System.out.println("request nya " + request.getRequestURI());
+        System.out.println("filter nya " + "/" + prefix + path);
         return Objects.equals(request.getRequestURI(), "/" + prefix + path);
+    }
+
+    private Boolean isURLEquals(HttpServletRequest request, String prefix){
+        return Objects.equals(request.getRequestURI(), "/" + prefix);
     }
 
     private Boolean isURLContain(HttpServletRequest request, String prefix, String path){
         return request.getRequestURI().contains("/" + prefix + path);
+    }
+
+    private Boolean isURLContain(HttpServletRequest request, String prefix){
+        return request.getRequestURI().contains("/" + prefix);
     }
 }

@@ -33,9 +33,8 @@ public class EmailController {
     IdentityService identityService;
 
     @PostMapping(EmailURL.pathBroadcastEmail)
-    public ResponseEntity broadcastEmail(@RequestBody String body){
+    public ResponseEntity broadcastEmail(@RequestBody JSONObject jsonObject){
         try {
-            JSONObject jsonObject = new JSONObject(body);
             String email = RequestBodyValidator.validateEmailRequest(jsonObject);
             emailService.sendBroadcastEmail(email);
             return new ResponseEntity(new BaseResponse<>(HttpStatus.OK.value(), MessageConstant.SUCCESS), HttpStatus.OK);
