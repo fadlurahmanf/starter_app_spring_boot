@@ -32,15 +32,15 @@ public class TransactionController {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successfully Post Fund Transfer")
     })
-    public ResponseEntity<BaseResponse<String>> fundTransfer(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorization, @RequestBody FundTransferRequest body){
+    public ResponseEntity<BaseResponse<String>> fundTransfer(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorization, @RequestBody FundTransferRequest body) {
         try {
             tesBalance += 1;
             IdentityEntity identity = identityService.getIdentityFromToken(authorization);
             service.fundTransfer(identity.id, "e8a8b64f-b833-4602-a8a3-6fed67f90911", tesBalance);
             return new ResponseEntity<>(new BaseResponse<>(HttpStatus.OK.value(), MessageConstant.SUCCESS), HttpStatus.OK);
-        }catch (CustomException e){
+        } catch (CustomException e) {
             return new ResponseEntity<>(new BaseResponse<>(e.statusCode, e.message), e.httpStatus);
-        } catch (Exception e){
+        } catch (Exception e) {
             return new ResponseEntity<>(new BaseResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
