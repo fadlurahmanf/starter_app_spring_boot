@@ -4,6 +4,8 @@ public class MessageConstant {
     public static final String SUCCESS = "SUCCESS";
     public static final String FAILED = "FAILED";
 
+    public static final String FIELD_REQUIRED = "FIELD_REQUIRED";
+
     public static final String EMAIL_REQUIRED = "EMAIL_REQUIRED";
     public static final String EMAIL_ALREADY_EXIST = "EMAIL_ALREADY_EXIST";
     public static final String WRONG_FORMAT_EMAIL = "WRONG_FORMAT_EMAIL";

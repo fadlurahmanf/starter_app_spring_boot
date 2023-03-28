@@ -13,7 +13,7 @@ import java.util.concurrent.Executor;
 public class FCMService {
     Logger logger = LoggerFactory.getLogger(FCMService.class);
 
-    private FirebaseMessaging firebaseMessaging;
+    private final FirebaseMessaging firebaseMessaging;
 
     public FCMService(FirebaseMessaging firebaseMessaging){
         this.firebaseMessaging = firebaseMessaging;
