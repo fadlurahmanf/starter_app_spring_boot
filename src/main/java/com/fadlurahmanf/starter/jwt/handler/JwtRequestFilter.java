@@ -5,7 +5,7 @@ import com.fadlurahmanf.starter.general.constant.MessageConstant;
 import com.fadlurahmanf.starter.general.dto.exception.CustomIOException;
 import com.fadlurahmanf.starter.general.dto.response.BaseResponse;
 import com.fadlurahmanf.starter.identity.constant.IdentityURL;
-import com.fadlurahmanf.starter.swagger.configuration.SwaggerURL;
+import com.fadlurahmanf.starter.product.constant.ProductURL;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +41,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 isURLEquals(request, IdentityURL.basePrefix, IdentityURL.pathListAccount) ||
                 isURLEquals(request, IdentityURL.basePrefix, IdentityURL.pathRefreshToken) ||
                 isURLEquals(request, EmailURL.basePrefix, EmailURL.pathRequestEmailRegistration) ||
+                isURLEquals(request, ProductURL.basePrefix, "/buy-product") ||
                 isURLContain(request, EmailURL.basePrefix, EmailURL.pathVerifyEmailRegistration);
     }
 

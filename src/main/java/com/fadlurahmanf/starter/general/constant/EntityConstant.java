@@ -50,4 +50,12 @@ public class EntityConstant {
         public static final String isUsed = "is_used";
         public static final String createdAt = "created_at";
     }
+
+    public static class Product {
+        public static final String entity = "product";
+
+        // row
+        public static final String id = "id";
+        public static final String totalProduct = "total_product";
+    }
 }
